@@ -14,8 +14,7 @@ public class PieceMovesCalculator {
         switch (piece.getPieceType()){
             case KING:
                 KingCalculator Ki = new KingCalculator();
-                Ki.pieceMoves(board, myPosition, piece);
-                break;
+                return Ki.pieceMoves(board, myPosition, piece);
             case QUEEN:
                 QueenCalculator Qu = new QueenCalculator();
                 break;
