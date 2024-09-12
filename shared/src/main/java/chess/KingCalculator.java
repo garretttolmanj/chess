@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class KingCalculator extends PieceMovesCalculator{
-//    How do I reference the board that to calculate the moves?
     public KingCalculator() {}
 
     @Override
