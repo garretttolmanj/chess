@@ -31,7 +31,6 @@ public class KnightCalculator extends PieceMovesCalculator{
                     moves.add(new ChessMove(myPosition, newPosition, null));
                 }
             }
-
         }
         return moves;
     }
