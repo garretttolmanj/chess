@@ -39,5 +39,76 @@ public class ChessBoard {
      */
     public void resetBoard() {
         squares = new ChessPiece[8][8];
+        ChessPiece.PieceType[] backRow = {
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KING,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.ROOK,
+        };
+
+        for (int column = 1; column <= 8; column++) {
+            ChessPiece whitePawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            ChessPiece blackPawn = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+
+            ChessPiece whitePiece = new ChessPiece(ChessGame.TeamColor.WHITE, backRow[column - 1]);
+            ChessPiece blackPiece = new ChessPiece(ChessGame.TeamColor.BLACK, backRow[column - 1]);
+
+            ChessPosition whitePawnPosition = new ChessPosition(2, column);
+            ChessPosition blackPawnPosition = new ChessPosition(7, column);
+
+            ChessPosition whitePiecePosition = new ChessPosition(1, column);
+            ChessPosition blackPiecePosition = new ChessPosition(8, column);
+
+            addPiece(whitePawnPosition, whitePawn);
+            addPiece(blackPawnPosition, blackPawn);
+            addPiece(whitePiecePosition, whitePiece);
+            addPiece(blackPiecePosition, blackPiece);
+        }
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ChessBoard otherBoard = (ChessBoard) obj;
+
+        for (int row = 1; row <= 8; row++) {
+            for (int column = 1; column <= 8; column++) {
+                ChessPosition position = new ChessPosition(row, column);
+                ChessPiece thisPiece = this.getPiece(position);
+                ChessPiece otherPiece = otherBoard.getPiece(position);
+
+                if (thisPiece == null && otherPiece == null) {
+                    continue;
+                }
+                if (thisPiece == null || otherPiece == null || !thisPiece.equals(otherPiece)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (int row = 1; row <= 8; row++) {
+            for (int column = 1; column <= 8; column++) {
+                ChessPosition position = new ChessPosition(row, column);
+                ChessPiece thisPiece = this.getPiece(position);
+                if (thisPiece == null) {
+                    continue;
+                }
+                result = 31 * result + thisPiece.hashCode();
+            }
+        }
+        return result;
     }
 }
