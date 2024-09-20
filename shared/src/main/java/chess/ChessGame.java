@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -9,16 +10,18 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessGame {
+    private TeamColor playerTurn;
+    private ChessBoard gameBoard;
 
     public ChessGame() {
-
+        this.playerTurn = TeamColor.WHITE;
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return playerTurn;
     }
 
     /**
@@ -27,7 +30,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        playerTurn = team;
     }
 
     /**
@@ -45,8 +48,19 @@ public class ChessGame {
      * @return Set of valid moves for requested piece, or null if no piece at
      * startPosition
      */
+
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        if (gameBoard.getPiece(startPosition) == null) {
+            return null;
+        } else {
+            ChessPiece piece = gameBoard.getPiece(startPosition);
+            Collection<ChessMove> moves = piece.pieceMoves(gameBoard, startPosition);
+
+            if (isInCheck(piece.getTeamColor())) {
+                return validMoveCalculator.findValidMoves(gameBoard, startPosition, moves, piece.getTeamColor());
+            }
+            return moves;
+        }
     }
 
     /**
@@ -56,7 +70,11 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece piece = gameBoard.getPiece(startPosition);
+        gameBoard.addPiece(endPosition, piece);
+        gameBoard.removePiece(startPosition);
     }
 
     /**
@@ -66,8 +84,37 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+//        Iterate over the board to find the king's position and collect a list of enemy moves.
+//        If at least one of the enemy moves matches the king's position, return true.
+        Collection<ChessMove> enemyMoves = new ArrayList<>();
+        ChessPosition kingPosition = null;
+
+        for (int row = 1; row < 9; row++) {
+            for (int col = 1; col < 9; col++) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = gameBoard.getPiece(position);
+
+                if (piece != null) {
+                    if (piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING) {
+                        kingPosition = position;
+                    }
+                    else if (piece.getTeamColor() != teamColor) {
+                        enemyMoves.addAll(piece.pieceMoves(gameBoard, position));
+                    }
+                }
+            }
+        }
+        if (kingPosition != null) {
+            for (ChessMove move : enemyMoves) {
+                if (move.getEndPosition().equals(kingPosition)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
+
 
     /**
      * Determines if the given team is in checkmate
@@ -96,7 +143,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        gameBoard = board;
     }
 
     /**
@@ -105,6 +152,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return gameBoard;
     }
 }
