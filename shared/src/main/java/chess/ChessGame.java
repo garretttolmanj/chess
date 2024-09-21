@@ -12,10 +12,12 @@ import java.util.Collection;
 public class ChessGame {
     private TeamColor playerTurn;
     private ChessBoard gameBoard = new ChessBoard();
+    private boolean castlingPossible;
 
     public ChessGame() {
         this.playerTurn = TeamColor.WHITE;
         this.gameBoard.resetBoard();
+        this.castlingPossible = true;
     }
 
     /**
