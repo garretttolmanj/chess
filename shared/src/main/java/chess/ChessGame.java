@@ -55,11 +55,32 @@ public class ChessGame {
         } else {
             ChessPiece piece = gameBoard.getPiece(startPosition);
             Collection<ChessMove> moves = piece.pieceMoves(gameBoard, startPosition);
+            Collection<ChessMove> validMoves = new ArrayList<>();
 
             if (isInCheck(piece.getTeamColor())) {
-                return validMoveCalculator.findValidMoves(gameBoard, startPosition, moves, piece.getTeamColor());
+                for (ChessMove move : moves) {
+                    ChessPiece enemyPiece = gameBoard.getPiece(move.getEndPosition());
+                    testMove(move);
+                    if (!isInCheck(piece.getTeamColor())){
+                        if (!validMoves.contains(move)) {
+                            validMoves.add(move);
+                        }                    }
+                    reverseTestMove(move, enemyPiece);
+                }
+            } else {
+                for (ChessMove move : moves) {
+                    ChessPiece enemyPiece = gameBoard.getPiece(move.getEndPosition());
+                    testMove(move);
+                    if (isInCheck(piece.getTeamColor())){
+                        continue;
+                    }
+                    if (!validMoves.contains(move)) {
+                        validMoves.add(move);
+                    }
+                    reverseTestMove(move, enemyPiece);
+                }
             }
-            return moves;
+            return validMoves;
         }
     }
 
@@ -72,9 +93,27 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
+
         ChessPiece piece = gameBoard.getPiece(startPosition);
         gameBoard.addPiece(endPosition, piece);
         gameBoard.removePiece(startPosition);
+    }
+
+    public void testMove(ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        ChessPiece piece = gameBoard.getPiece(startPosition);
+        gameBoard.addPiece(endPosition, piece);
+        gameBoard.removePiece(startPosition);
+    }
+    public void reverseTestMove(ChessMove move, ChessPiece enemyPiece) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        ChessPiece piece = gameBoard.getPiece(endPosition);
+        gameBoard.addPiece(startPosition, piece);
+        gameBoard.addPiece(endPosition,enemyPiece);
     }
 
     /**
