@@ -12,12 +12,25 @@ import java.util.Collection;
 public class ChessGame {
     private TeamColor playerTurn;
     private ChessBoard gameBoard = new ChessBoard();
-    private boolean castlingPossible;
+//    Attributes for Castling
+    private boolean whiteKingHasntMoved;
+    private boolean whiteRightRookHasntMoved;
+    private boolean whiteLeftRookHasntMoved;
+    private boolean blackKingHasntMoved;
+    private boolean blackRightRookHasntMoved;
+    private boolean blackLeftRookHasntMoved;
+
 
     public ChessGame() {
         this.playerTurn = TeamColor.WHITE;
         this.gameBoard.resetBoard();
-        this.castlingPossible = true;
+
+        this.whiteKingHasntMoved = true;
+        this.whiteRightRookHasntMoved = true;
+        this.whiteLeftRookHasntMoved = true;
+        this.blackKingHasntMoved = true;
+        this.blackRightRookHasntMoved = true;
+        this.blackLeftRookHasntMoved = true;
     }
 
     /**
@@ -104,6 +117,39 @@ public class ChessGame {
             gameBoard.addPiece(endPosition, piece);
             gameBoard.removePiece(startPosition);
             playerTurn = (playerTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+            if (piece.getPieceType() == ChessPiece.PieceType.KING || piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+                kingOrRookMoved(move, piece);
+            }
+        }
+    }
+
+    public void kingOrRookMoved(ChessMove move, ChessPiece piece) {
+        int row = move.getStartPosition().getRow();
+        int col = move.getStartPosition().getColumn();
+
+        TeamColor color = piece.getTeamColor();
+        ChessPiece.PieceType type = piece.getPieceType();
+        if (color == TeamColor.WHITE && type == ChessPiece.PieceType.KING) {
+            this.whiteKingHasntMoved = false;
+        }
+        if (color == TeamColor.BLACK && type == ChessPiece.PieceType.KING) {
+            this.blackKingHasntMoved = false;
+        }
+        if (color == TeamColor.WHITE && type == ChessPiece.PieceType.ROOK) {
+            if (row == 1 && col == 1) {
+                this.whiteLeftRookHasntMoved = false;
+            }
+            if (row == 1 && col == 8) {
+                this.whiteRightRookHasntMoved = false;
+            }
+        }
+        if (color == TeamColor.BLACK && type == ChessPiece.PieceType.ROOK) {
+            if (row == 8 && col == 1) {
+                this.blackLeftRookHasntMoved = false;
+            }
+            if (row == 8 && col == 8) {
+                this.blackRightRookHasntMoved = false;
+            }
         }
     }
 
