@@ -12,25 +12,12 @@ import java.util.Collection;
 public class ChessGame {
     private TeamColor playerTurn;
     private ChessBoard gameBoard = new ChessBoard();
-//    Attributes for Castling
-    private boolean whiteKingHasntMoved;
-    private boolean whiteRightRookHasntMoved;
-    private boolean whiteLeftRookHasntMoved;
-    private boolean blackKingHasntMoved;
-    private boolean blackRightRookHasntMoved;
-    private boolean blackLeftRookHasntMoved;
 
 
     public ChessGame() {
         this.playerTurn = TeamColor.WHITE;
         this.gameBoard.resetBoard();
 
-        this.whiteKingHasntMoved = true;
-        this.whiteRightRookHasntMoved = true;
-        this.whiteLeftRookHasntMoved = true;
-        this.blackKingHasntMoved = true;
-        this.blackRightRookHasntMoved = true;
-        this.blackLeftRookHasntMoved = true;
     }
 
     /**
@@ -82,8 +69,11 @@ public class ChessGame {
                 validMoves.add(move);
             }
         }
+
         return validMoves;
     }
+
+
 
     /**
      * Makes a move in a chess game
@@ -117,13 +107,13 @@ public class ChessGame {
             gameBoard.addPiece(endPosition, piece);
             gameBoard.removePiece(startPosition);
             playerTurn = (playerTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
-            if (piece.getPieceType() == ChessPiece.PieceType.KING || piece.getPieceType() == ChessPiece.PieceType.ROOK) {
-                kingOrRookMoved(move, piece);
-            }
         }
     }
 
-
+    /**
+     * testMove and reverseTestMove are methods that temporarily move
+     * a piece so that game state testing can be done.
+     */
     public void testMove(ChessMove move) {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
@@ -141,94 +131,6 @@ public class ChessGame {
         gameBoard.addPiece(endPosition,enemyPiece);
     }
 
-    public void kingOrRookMoved(ChessMove move, ChessPiece piece) {
-        int row = move.getStartPosition().getRow();
-        int col = move.getStartPosition().getColumn();
-
-        TeamColor color = piece.getTeamColor();
-        ChessPiece.PieceType type = piece.getPieceType();
-        if (color == TeamColor.WHITE && type == ChessPiece.PieceType.KING) {
-            this.whiteKingHasntMoved = false;
-        }
-        if (color == TeamColor.BLACK && type == ChessPiece.PieceType.KING) {
-            this.blackKingHasntMoved = false;
-        }
-        if (color == TeamColor.WHITE && type == ChessPiece.PieceType.ROOK) {
-            if (row == 1 && col == 1) {
-                this.whiteLeftRookHasntMoved = false;
-            }
-            if (row == 1 && col == 8) {
-                this.whiteRightRookHasntMoved = false;
-            }
-        }
-        if (color == TeamColor.BLACK && type == ChessPiece.PieceType.ROOK) {
-            if (row == 8 && col == 1) {
-                this.blackLeftRookHasntMoved = false;
-            }
-            if (row == 8 && col == 8) {
-                this.blackRightRookHasntMoved = false;
-            }
-        }
-    }
-
-    public Collection<ChessMove> castlingMovesPossible(TeamColor teamColor) {
-        Collection<ChessMove> castlingMoves = new ArrayList<>();
-        if (teamColor == TeamColor.WHITE) {
-            if (whiteKingHasntMoved && whiteRightRookHasntMoved){
-                ChessPosition position1 = new ChessPosition(1, 6);
-                ChessPosition position2 = new ChessPosition(1, 7);
-                if (gameBoard.getPiece(position1) == null && gameBoard.getPiece(position2) == null){
-                    ChessPosition kingStart = new ChessPosition(1, 5);
-                    ChessPosition kingEnd = new ChessPosition(1, 7);
-                    ChessPosition RookStart = new ChessPosition(1, 8);
-                    ChessPosition RookEnd = new ChessPosition(1, 6);
-                    castlingMoves.add(new ChessMove(kingStart, kingEnd, null));
-                    castlingMoves.add(new ChessMove(RookStart, RookEnd, null));
-                }
-            }
-            if (whiteKingHasntMoved && whiteLeftRookHasntMoved) {
-                ChessPosition position1 = new ChessPosition(1, 4);
-                ChessPosition position2 = new ChessPosition(1, 3);
-                ChessPosition position3 = new ChessPosition(1, 2);
-                if (gameBoard.getPiece(position1) == null && gameBoard.getPiece(position2) == null && gameBoard.getPiece(position3) == null) {
-                    ChessPosition kingStart = new ChessPosition(1, 5);
-                    ChessPosition kingEnd = new ChessPosition(1, 3);
-                    ChessPosition RookStart = new ChessPosition(1, 1);
-                    ChessPosition RookEnd = new ChessPosition(1, 4);
-                    castlingMoves.add(new ChessMove(kingStart, kingEnd, null));
-                    castlingMoves.add(new ChessMove(RookStart, RookEnd, null));
-                }
-            }
-        }
-        if (teamColor == TeamColor.BLACK) {
-            if (blackKingHasntMoved && blackRightRookHasntMoved){
-                ChessPosition position1 = new ChessPosition(8, 6);
-                ChessPosition position2 = new ChessPosition(8, 7);
-                if (gameBoard.getPiece(position1) == null && gameBoard.getPiece(position2) == null){
-                    ChessPosition kingStart = new ChessPosition(8, 5);
-                    ChessPosition kingEnd = new ChessPosition(8, 7);
-                    ChessPosition RookStart = new ChessPosition(8, 8);
-                    ChessPosition RookEnd = new ChessPosition(8, 6);
-                    castlingMoves.add(new ChessMove(kingStart, kingEnd, null));
-                    castlingMoves.add(new ChessMove(RookStart, RookEnd, null));
-                }
-            }
-            if (blackKingHasntMoved && blackLeftRookHasntMoved) {
-                ChessPosition position1 = new ChessPosition(8, 4);
-                ChessPosition position2 = new ChessPosition(8, 3);
-                ChessPosition position3 = new ChessPosition(8, 2);
-                if (gameBoard.getPiece(position1) == null && gameBoard.getPiece(position2) == null && gameBoard.getPiece(position3) == null) {
-                    ChessPosition kingStart = new ChessPosition(8, 5);
-                    ChessPosition kingEnd = new ChessPosition(8, 3);
-                    ChessPosition RookStart = new ChessPosition(8, 1);
-                    ChessPosition RookEnd = new ChessPosition(8, 4);
-                    castlingMoves.add(new ChessMove(kingStart, kingEnd, null));
-                    castlingMoves.add(new ChessMove(RookStart, RookEnd, null));
-                }
-            }
-        }
-        return castlingMoves;
-    }
     /**
      * Determines if the given team is in check
      *
