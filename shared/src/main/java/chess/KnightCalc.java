@@ -3,8 +3,9 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KnightCalc extends PieceMovesCalculator{
-    public KnightCalc(){}
+public class KnightCalc extends PieceMovesCalculator {
+    public KnightCalc() {
+    }
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {

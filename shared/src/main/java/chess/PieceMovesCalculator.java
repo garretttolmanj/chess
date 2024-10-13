@@ -16,7 +16,7 @@ public class PieceMovesCalculator {
         int currentRow = row;
         int currentColumn = column;
 
-        while(true) {
+        while (true) {
             currentRow += direction[0];
             currentColumn += direction[1];
             if (currentRow < 1 || currentRow > 8 || currentColumn < 1 || currentColumn > 8) {

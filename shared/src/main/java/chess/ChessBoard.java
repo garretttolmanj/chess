@@ -24,8 +24,9 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         int row = position.getRow();
         int column = position.getColumn();
-        squares[row - 1][column -1] = piece;
+        squares[row - 1][column - 1] = piece;
     }
+
     public void removePiece(ChessPosition position) {
         int row = position.getRow();
         int column = position.getColumn();

@@ -74,7 +74,6 @@ public class ChessGame {
     }
 
 
-
     /**
      * Makes a move in a chess game
      *
@@ -122,13 +121,14 @@ public class ChessGame {
         gameBoard.addPiece(endPosition, piece);
         gameBoard.removePiece(startPosition);
     }
+
     public void reverseTestMove(ChessMove move, ChessPiece enemyPiece) {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
         ChessPiece piece = gameBoard.getPiece(endPosition);
         gameBoard.addPiece(startPosition, piece);
-        gameBoard.addPiece(endPosition,enemyPiece);
+        gameBoard.addPiece(endPosition, enemyPiece);
     }
 
     /**
