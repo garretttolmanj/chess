@@ -1,6 +1,10 @@
 package server;
 
 import spark.*;
+import com.google.gson.Gson;
+import model.*;
+import server.handler.*;
+import service.*;
 
 public class Server {
 
@@ -10,7 +14,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-
+        Spark.post("/session", this::login);
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
@@ -21,5 +25,18 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    /**
+     * Gson fromJson body
+     * Initialize UserService
+     * Pass body to UserService
+     * Receive Response
+     * Serialize to JSON
+     * Return HTTP Response
+     *
+     */
+    private Object login(Request req, Response res) {
+        return null;
     }
 }
