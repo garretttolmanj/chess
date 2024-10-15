@@ -1,5 +1,6 @@
 package server;
 
+import server.request.LoginRequest;
 import spark.*;
 import com.google.gson.Gson;
 import model.*;
@@ -37,6 +38,8 @@ public class Server {
      *
      */
     private Object login(Request req, Response res) {
-        return null;
+        var loginReq = new Gson().fromJson(req.body(), LoginRequest.class);
+        System.out.println(loginReq);
+        return new Gson().toJson(loginReq);
     }
 }
