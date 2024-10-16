@@ -9,6 +9,11 @@ public class MemoryAuthDAO implements AuthDAO{
     final private HashMap<String, String> sessions = new HashMap<>();
 
     @Override
+    public void clear() throws DataAccessException {
+        sessions.clear();
+    }
+
+    @Override
     public void createAuth(AuthData authData) throws DataAccessException {
         sessions.put(authData.authToken(), authData.username());
     }

@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.*;
+import server.request.LoginRequest;
 import server.response.LoginResponse;
 import server.response.ResponseException;
 
@@ -15,6 +16,11 @@ public class UserService {
     public UserService(UserDAO userAccess, AuthDAO authAccess) {
         this.userAccess = userAccess;
         this.authAccess = authAccess;
+    }
+
+    public void clear() throws DataAccessException {
+        userAccess.clear();
+        authAccess.clear();
     }
 
     public AuthData register(UserData user) {
@@ -31,18 +37,18 @@ public class UserService {
      * Use AuthDAO Add AuthData
      * Creates a Result Object
      *
-     * @param user
+     * @param loginRequest
      * @return AuthData
      */
-    public LoginResponse login(UserData user) throws DataAccessException, ResponseException {
-        UserData userData = userAccess.getUser(user.username());
+    public LoginResponse login(LoginRequest loginRequest) throws DataAccessException, ResponseException {
+        UserData userData = userAccess.getUser(loginRequest.getUsername());
 
-        if (userData.password().equals(user.password())) {
+        if (userData.password().equals(loginRequest.getPassword())) {
             String token = UUID.randomUUID().toString();
-            AuthData authData = new AuthData(token, user.username());
+            AuthData authData = new AuthData(token, loginRequest.getUsername());
             authAccess.createAuth(authData);
 
-            return new LoginResponse(token, user.username());
+            return new LoginResponse(loginRequest.getUsername(), token);
         } else {
             throw new ResponseException("Password doesn't match!");
         }

@@ -24,29 +24,32 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class UserServiceTest {
     static final UserService userService = new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
-    //    @BeforeEach
-//    void clear() throws Exception {
+
+
+//    @BeforeEach
+//    void clear() throws DataAccessException {
+//        userService.clear();
 //    }
 
     @Test
     void loginPositive() throws DataAccessException, ResponseException {
-        var user = new UserData("garrett", "johnson", "garrett@email.com");
-
+        var user = new LoginRequest("garrett", "johnson");
         var loginResponse = userService.login(user);
-        LoginResponse correctAuthData = new LoginResponse(UUID.randomUUID().toString(), "garrett");
         assertEquals("garrett", loginResponse.getUsername());
-        assertEquals(correctAuthData, loginResponse);
-
-
-//      length of users should be one
-//      It should be equal to the following object
-//      It should be equal to the following UserData
-//        assertEquals(1, )
-//        assertEquals()
+        assertNotEquals(UUID.randomUUID().toString(), loginResponse.getAuthToken());
     }
+
     @Test
-    void addUserNegative() throws ResponseException {
-    }
+    void loginNegative() throws DataAccessException, ResponseException {
+        var request1 = new LoginRequest("garry", "johnson");
 
+        // Expect a DataAccessException for username not found
+        assertThrows(DataAccessException.class, () -> userService.login(request1));
+
+        var request2 = new LoginRequest("garrett", "john");
+
+        // Expect a ResponseException for password mismatch
+        assertThrows(ResponseException.class, () -> userService.login(request2));
+    }
 
 }
