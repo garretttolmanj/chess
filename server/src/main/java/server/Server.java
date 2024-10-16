@@ -1,6 +1,12 @@
 package server;
 
+import dataaccess.DataAccessException;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryUserDAO;
 import server.request.LoginRequest;
+import server.response.LoginResponse;
+import server.response.LoginResponseError;
+import server.response.ResponseException;
 import spark.*;
 import com.google.gson.Gson;
 import model.*;
@@ -8,7 +14,10 @@ import server.handler.*;
 import service.*;
 
 public class Server {
+    private final UserService userService = new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
 
+    public Server() {
+    }
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
@@ -37,9 +46,25 @@ public class Server {
      * Return HTTP Response
      *
      */
-    private Object login(Request req, Response res) {
-        var loginReq = new Gson().fromJson(req.body(), LoginRequest.class);
-        System.out.println(loginReq);
-        return new Gson().toJson(loginReq);
+    private Object login(Request req, Response res) throws ResponseException, DataAccessException {
+        try {
+            var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+            LoginResponse loginResponse = userService.login(loginRequest);
+            return new Gson().toJson(loginResponse);
+        } catch (DataAccessException e) {
+            // Set the response status to indicate a server error (500)
+            res.status(500);
+
+            // Return a JSON-formatted error message
+            return new Gson().toJson(new LoginResponseError("DataAccessException", e.getMessage()));
+
+        } catch (ResponseException e) {
+            // Set the response status to indicate a bad request (400)
+            res.status(400);
+
+            // Return a JSON-formatted error message
+            return new Gson().toJson(new LoginResponseError("ResponseException", e.getMessage()));
+        }
+
     }
 }

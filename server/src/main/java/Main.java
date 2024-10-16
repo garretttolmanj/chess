@@ -1,5 +1,8 @@
 import chess.*;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryUserDAO;
 import server.Server;
+import service.UserService;
 import spark.*;
 public class Main {
     public static void main(String[] args) {
