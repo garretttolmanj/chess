@@ -4,15 +4,9 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
 import server.request.ChessRequest;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.request.TestRequest;
 import server.response.*;
-import service.Service;
 import spark.*;
 import com.google.gson.Gson;
-import model.*;
-import server.handler.*;
 import service.*;
 
 public class Server {
@@ -51,15 +45,16 @@ public class Server {
         ChessRequest chessRequest = new Gson().fromJson(req.body(), ChessRequest.class);
 
         String authToken = req.headers("Authorization");
+        ServerResponse response = new ServerResponse();
+        response.setUsername(chessRequest.getUsername());
+        response.setAuthToken(authToken);
 
-//        TestRequest testRequest = new TestRequest(testRequestFromBody.username(), authToken);
-
-        return new Gson().toJson(chessRequest);
+        return new Gson().toJson(response);
     }
 
     private Object register(Request req, Response res) throws DataAccessException {
-        var registerRequest = new Gson().fromJson(req.body(), RegisterRequest.class);
-        RegisterResponse registerResponse = userService.register(registerRequest);
+        var registerRequest = new Gson().fromJson(req.body(), ChessRequest.class);
+        ServerResponse registerResponse = userService.register(registerRequest);
         return new Gson().toJson(registerResponse);
     }
     /**
@@ -73,8 +68,8 @@ public class Server {
      */
     private Object login(Request req, Response res) throws ResponseException, DataAccessException {
         try {
-            var loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
-            LoginResponse loginResponse = userService.login(loginRequest);
+            var loginRequest = new Gson().fromJson(req.body(), ChessRequest.class);
+            ServerResponse loginResponse = userService.login(loginRequest);
             return new Gson().toJson(loginResponse);
         } catch (DataAccessException e) {
             // Set the response status to indicate a server error (500)

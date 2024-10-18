@@ -1,18 +1,11 @@
 package service;
 
 
-import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
-import model.AuthData;
-import model.UserData;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.response.LoginResponse;
+import server.request.ChessRequest;
 import server.response.ResponseException;
 
 import java.util.UUID;
@@ -37,7 +30,11 @@ public class UserServiceTest {
         System.out.println(userService.getUserAccess());
         System.out.println(userService.getAuthAccess());
 
-        var registerRequest = new RegisterRequest("garry", "johnson", "garrett@mail.com");
+        var registerRequest = new ChessRequest();
+        registerRequest.setUsername("garry");
+        registerRequest.setPassword("johnson");
+        registerRequest.setEmail("garrett@mail.com");
+
         var registerResponse = userService.register(registerRequest);
 
         assertEquals("garry", registerResponse.getUsername());
@@ -50,7 +47,10 @@ public class UserServiceTest {
 
     @Test
     void loginPositive() throws DataAccessException, ResponseException {
-        var user = new LoginRequest("garrett", "johnson");
+        var user = new ChessRequest();
+        user.setUsername("garrett");
+        user.setPassword("johnson");
+
         var loginResponse = userService.login(user);
         assertEquals("garrett", loginResponse.getUsername());
         assertNotEquals(UUID.randomUUID().toString(), loginResponse.getAuthToken());
@@ -58,13 +58,15 @@ public class UserServiceTest {
 
     @Test
     void loginNegative() throws DataAccessException, ResponseException {
-        var request1 = new LoginRequest("garry", "johnson");
-
+        var request1 = new ChessRequest();
+        request1.setUsername("garry");
+        request1.setPassword("johnson");
         // Expect a DataAccessException for username not found
         assertThrows(DataAccessException.class, () -> userService.login(request1));
 
-        var request2 = new LoginRequest("garrett", "john");
-
+        var request2 = new ChessRequest();
+        request2.setUsername("garrett");
+        request2.setPassword("john");
         // Expect a ResponseException for password mismatch
         assertThrows(ResponseException.class, () -> userService.login(request2));
     }

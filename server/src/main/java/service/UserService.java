@@ -2,11 +2,9 @@ package service;
 
 import dataaccess.*;
 import model.*;
-import server.request.LoginRequest;
-import server.request.RegisterRequest;
-import server.response.LoginResponse;
-import server.response.RegisterResponse;
+import server.request.ChessRequest;
 import server.response.ResponseException;
+import server.response.ServerResponse;
 
 import java.util.UUID;
 
@@ -25,7 +23,7 @@ public class UserService {
         authAccess.clear();
     }
 
-    public RegisterResponse register(RegisterRequest registerRequest) throws DataAccessException {
+    public ServerResponse register(ChessRequest registerRequest) throws DataAccessException {
         UserData userData = new UserData(registerRequest.getUsername(),
                 registerRequest.getPassword(),
                 registerRequest.getEmail());
@@ -34,7 +32,10 @@ public class UserService {
             String token = UUID.randomUUID().toString();
             AuthData authData = new AuthData(token, registerRequest.getUsername());
             authAccess.createAuth(authData);
-            return new RegisterResponse(registerRequest.getUsername(), token);
+            ServerResponse registerResponse = new ServerResponse();
+            registerResponse.setUsername(registerRequest.getUsername());
+            registerResponse.setAuthToken(token);
+            return registerResponse;
         } else {
             throw new DataAccessException("Error: already taken");
         }
@@ -53,15 +54,19 @@ public class UserService {
      * @param loginRequest
      * @return AuthData
      */
-    public LoginResponse login(LoginRequest loginRequest) throws DataAccessException, ResponseException {
-        UserData userData = userAccess.getUser(loginRequest.getUsername());
+    public ServerResponse login(ChessRequest loginRequest) throws DataAccessException, ResponseException {
+        String username = loginRequest.getUsername();
+        String password = loginRequest.getPassword();
+        UserData userData = userAccess.getUser(username);
 
-        if (userData.password().equals(loginRequest.getPassword())) {
+        if (userData.password().equals(password)) {
             String token = UUID.randomUUID().toString();
-            AuthData authData = new AuthData(token, loginRequest.getUsername());
+            AuthData authData = new AuthData(token, username);
             authAccess.createAuth(authData);
-
-            return new LoginResponse(loginRequest.getUsername(), token);
+            ServerResponse loginResponse = new ServerResponse();
+            loginResponse.setUsername(username);
+            loginResponse.setAuthToken(token);
+            return loginResponse;
         } else {
             throw new ResponseException("Error: unauthorized");
         }
