@@ -24,14 +24,19 @@ public class UserService {
     }
 
     public ServerResponse register(ChessRequest registerRequest) throws DataAccessException {
-        UserData userData = new UserData(registerRequest.getUsername(),
-                registerRequest.getPassword(),
-                registerRequest.getEmail());
-        if (userAccess.getUser(registerRequest.getUsername()) == null) {
+        String username = registerRequest.getUsername();
+        String password = registerRequest.getPassword();
+        String email = registerRequest.getEmail();
+
+        UserData userData = new UserData(username, password, email);
+
+        if (userAccess.getUser(username) == null) {
             userAccess.createUser(userData);
+
             String token = UUID.randomUUID().toString();
-            AuthData authData = new AuthData(token, registerRequest.getUsername());
+            AuthData authData = new AuthData(token, username);
             authAccess.createAuth(authData);
+
             ServerResponse registerResponse = new ServerResponse();
             registerResponse.setUsername(registerRequest.getUsername());
             registerResponse.setAuthToken(token);
