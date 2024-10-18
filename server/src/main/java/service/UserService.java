@@ -3,7 +3,9 @@ package service;
 import dataaccess.*;
 import model.*;
 import server.request.LoginRequest;
+import server.request.RegisterRequest;
 import server.response.LoginResponse;
+import server.response.RegisterResponse;
 import server.response.ResponseException;
 
 import java.util.UUID;
@@ -18,13 +20,24 @@ public class UserService {
         this.authAccess = authAccess;
     }
 
-    public void clear() throws DataAccessException {
+    public void clear() {
         userAccess.clear();
         authAccess.clear();
     }
 
-    public AuthData register(UserData user) {
-        return null;
+    public RegisterResponse register(RegisterRequest registerRequest) throws DataAccessException {
+        UserData userData = new UserData(registerRequest.getUsername(),
+                registerRequest.getPassword(),
+                registerRequest.getEmail());
+        if (userAccess.getUser(registerRequest.getUsername()) == null) {
+            userAccess.createUser(userData);
+            String token = UUID.randomUUID().toString();
+            AuthData authData = new AuthData(token, registerRequest.getUsername());
+            authAccess.createAuth(authData);
+            return new RegisterResponse(registerRequest.getUsername(), token);
+        } else {
+            throw new DataAccessException("Error: already taken");
+        }
     }
 
     /**
@@ -50,10 +63,19 @@ public class UserService {
 
             return new LoginResponse(loginRequest.getUsername(), token);
         } else {
-            throw new ResponseException("Password doesn't match!");
+            throw new ResponseException("Error: unauthorized");
         }
 
 
     }
     public void logout(AuthData auth) {}
+
+
+    public String getUserAccess() {
+        return userAccess.toString();
+    }
+
+    public String getAuthAccess() {
+        return authAccess.toString();
+    }
 }

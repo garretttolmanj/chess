@@ -1,9 +1,11 @@
 package dataaccess;
 
 import model.UserData;
+import server.request.RegisterRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MemoryUserDAO implements UserDAO {
     final private HashMap<String, UserData> users = new HashMap<>();
@@ -14,17 +16,35 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() {
         users.clear();
     }
-    //    public void createUser(Request req) {
-//    }
     @Override
-    public UserData getUser(String username) throws DataAccessException {
-        if (users.containsKey(username)) {
-            return users.get(username);
-        } else {
-            throw new DataAccessException("username not found in database");
-        }
+    public void createUser(UserData userData){
+        users.put(userData.username(), userData);
+    }
+    @Override
+    public UserData getUser(String username) {
+        return users.getOrDefault(username, null);
+    }
+
+    @Override
+    public String toString() {
+        return "MemoryUserDAO{" +
+                "users=" + users +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MemoryUserDAO that = (MemoryUserDAO) o;
+        return Objects.equals(users, that.users);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(users);
     }
 }
