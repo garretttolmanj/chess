@@ -9,8 +9,6 @@ public class MemoryUserDAO implements UserDAO {
     final private HashMap<String, UserData> users = new HashMap<>();
 
     public MemoryUserDAO() {
-//        This is for testing purposes
-        users.put("garrett", new UserData("garrett", "johnson", "garrett@email.com"));
     }
 
     @Override
@@ -18,7 +16,7 @@ public class MemoryUserDAO implements UserDAO {
         users.clear();
     }
     @Override
-    public void createUser(UserData userData){
+    public void createUser(UserData userData) {
         users.put(userData.username(), userData);
     }
     @Override

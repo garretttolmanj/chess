@@ -3,9 +3,9 @@ package service;
 import dataaccess.*;
 import model.*;
 import server.request.ChessRequest;
-import server.response.ResponseException;
 import server.response.ServerResponse;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -18,15 +18,19 @@ public class UserService {
         this.authAccess = authAccess;
     }
 
-    public void clear() {
+    public ServerResponse clear() {
         userAccess.clear();
         authAccess.clear();
+        return new ServerResponse();
     }
 
-    public ServerResponse register(ChessRequest registerRequest) throws DataAccessException {
+    public ServerResponse register(ChessRequest registerRequest) {
         String username = registerRequest.getUsername();
         String password = registerRequest.getPassword();
         String email = registerRequest.getEmail();
+        if (username == null || password == null || email == null) {
+            throw new BadRequestException("Error: bad request");
+        }
 
         UserData userData = new UserData(username, password, email);
 
@@ -42,7 +46,7 @@ public class UserService {
             registerResponse.setAuthToken(token);
             return registerResponse;
         } else {
-            throw new DataAccessException("Error: already taken");
+            throw new AlreadyTakenException("Error: already taken");
         }
     }
 
@@ -59,33 +63,47 @@ public class UserService {
      * @param loginRequest
      * @return AuthData
      */
-    public ServerResponse login(ChessRequest loginRequest) throws DataAccessException, ResponseException {
+    public ServerResponse login(ChessRequest loginRequest) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
+        if (username == null || password == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+
         UserData userData = userAccess.getUser(username);
+
+        if (userData == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
 
         if (userData.password().equals(password)) {
             String token = UUID.randomUUID().toString();
             AuthData authData = new AuthData(token, username);
             authAccess.createAuth(authData);
+
             ServerResponse loginResponse = new ServerResponse();
             loginResponse.setUsername(username);
             loginResponse.setAuthToken(token);
             return loginResponse;
         } else {
-            throw new ResponseException("Error: unauthorized");
+            throw new UnauthorizedException("Error: unauthorized");
         }
 
 
     }
-    public void logout(AuthData auth) {}
+    public ServerResponse logout(ChessRequest request) {
+        String authToken = request.getAuthToken();
+        AuthData auth = authAccess.getAuth(authToken);
 
-
-    public String getUserAccess() {
-        return userAccess.toString();
+        if (auth == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        if (auth.authToken().equals(authToken)) {
+            authAccess.deleteAuth(authToken);
+            return new ServerResponse();
+        } else {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
     }
 
-    public String getAuthAccess() {
-        return authAccess.toString();
-    }
 }

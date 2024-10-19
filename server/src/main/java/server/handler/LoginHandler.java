@@ -18,16 +18,8 @@ public class LoginHandler {
     }
 
     public Object handleLogin(Request req, Response res) {
-        try {
-            var loginRequest = new Gson().fromJson(req.body(), ChessRequest.class);
-            ServerResponse loginResponse = userService.login(loginRequest);
-            return new Gson().toJson(loginResponse);
-        } catch (DataAccessException e) {
-            res.status(500);
-            return new Gson().toJson(new ErrorResponse(e.getMessage()));
-        } catch (ResponseException e) {
-            res.status(400);
-            return new Gson().toJson(new ErrorResponse(e.getMessage()));
-        }
+        var loginRequest = new Gson().fromJson(req.body(), ChessRequest.class);
+        ServerResponse loginResponse = userService.login(loginRequest);
+        return new Gson().toJson(loginResponse);
     }
 }

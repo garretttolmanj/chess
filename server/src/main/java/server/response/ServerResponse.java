@@ -3,6 +3,7 @@ package server.response;
 import chess.ChessGame;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class ServerResponse {
@@ -48,5 +49,18 @@ public class ServerResponse {
 
     public void setGameID(String gameID) {
         this.gameID = gameID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServerResponse that = (ServerResponse) o;
+        return Objects.equals(username, that.username) && Objects.equals(authToken, that.authToken) && Objects.equals(games, that.games) && Objects.equals(gameID, that.gameID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, authToken, games, gameID);
     }
 }
