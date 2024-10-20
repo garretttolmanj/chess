@@ -94,15 +94,11 @@ public class UserService {
     public ServerResponse logout(ChessRequest request) {
         String authToken = request.getAuthToken();
         AuthData auth = authAccess.getAuth(authToken);
-
         if (auth == null) {
             throw new UnauthorizedException("Error: unauthorized");
-        }
-        if (auth.authToken().equals(authToken)) {
+        } else {
             authAccess.deleteAuth(authToken);
             return new ServerResponse();
-        } else {
-            throw new UnauthorizedException("Error: unauthorized");
         }
     }
 

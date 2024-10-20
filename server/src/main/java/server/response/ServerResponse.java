@@ -1,6 +1,7 @@
 package server.response;
 
 import chess.ChessGame;
+import service.GameInfo;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -10,7 +11,7 @@ public class ServerResponse {
     private String username;
     private String authToken;
     private ArrayList games;
-    private String gameID;
+    private Integer gameID;
 
     public ServerResponse() {
         this.username = null;
@@ -35,19 +36,19 @@ public class ServerResponse {
         this.authToken = authToken;
     }
 
-    public ArrayList getGames() {
+    public ArrayList<GameInfo> getGames() {
         return games;
     }
 
-    public void setGames(ArrayList games) {
+    public void setGames(ArrayList<GameInfo> games) {
         this.games = games;
     }
 
-    public String getGameID() {
+    public Integer getGameID() {
         return gameID;
     }
 
-    public void setGameID(String gameID) {
+    public void setGameID(Integer gameID) {
         this.gameID = gameID;
     }
 
