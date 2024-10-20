@@ -30,6 +30,16 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
+    public GameData getGame(Integer gameID) {
+        for (GameData game : games) {
+            if (game.gameID() == gameID) {
+                return game;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

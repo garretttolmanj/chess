@@ -82,4 +82,53 @@ public class GameService {
         }
         return false;
     }
+
+    public ServerResponse joinGame(ChessRequest joinGameRequest) {
+        // Verify the authToken
+        String authToken = joinGameRequest.getAuthToken();
+        AuthData auth = authAccess.getAuth(authToken);
+        if (auth == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        // Verify that the request is valid
+        String playerColor = joinGameRequest.getPlayerColor();
+        Integer gameID = joinGameRequest.getGameID();
+        if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK"))) {
+            throw new BadRequestException("Error: bad request");
+        }
+        if (gameID == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        GameData game = gameAccess.getGame(gameID);
+        if (game == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        if (playerColor.equals("WHITE")) {
+            if (game.whiteUsername() == null) {
+                // Update the Game
+                gameAccess.removeGame(gameID);
+                GameData updatedGame = new GameData(gameID,
+                        auth.username(),
+                        game.blackUsername(),
+                        game.gameName(),
+                        game.game());
+                gameAccess.createGame(updatedGame);
+                return new ServerResponse();
+            }
+        }
+        if (playerColor.equals("BLACK")) {
+            if (game.blackUsername() == null) {
+                // Update the Game
+                gameAccess.removeGame(gameID);
+                GameData updatedGame = new GameData(gameID,
+                        game.whiteUsername(),
+                        auth.username(),
+                        game.gameName(),
+                        game.game());
+                gameAccess.createGame(updatedGame);
+                return new ServerResponse();
+            }
+        }
+        throw new AlreadyTakenException("Error: already taken");
+    }
 }

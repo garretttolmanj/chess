@@ -21,6 +21,7 @@ public class Server {
     private final LogoutHandler logoutHandler;
     private final ListGamesHandler listGamesHandler;
     private final CreateGameHandler createGameHandler;
+    private final JoinGameHandler joinGameHandler;
     private final ErrorHandler errorHandler;
 
     public Server() {
@@ -30,6 +31,7 @@ public class Server {
         this.logoutHandler = new LogoutHandler(userService);
         this.listGamesHandler = new ListGamesHandler(gameService);
         this.createGameHandler = new CreateGameHandler(gameService);
+        this.joinGameHandler = new JoinGameHandler(gameService);
         this.errorHandler = new ErrorHandler();
     }
     public int run(int desiredPort) {
@@ -44,6 +46,7 @@ public class Server {
         Spark.delete("/session", logoutHandler::handleLogout);
         Spark.get("/game", listGamesHandler::handleListGames);
         Spark.post("/game", createGameHandler::handleCreateGame);
+        Spark.put("/game", joinGameHandler::handleJoinGame);
 
         // Exception Handling
         Spark.exception(BadRequestException.class, (e, req, res) -> {

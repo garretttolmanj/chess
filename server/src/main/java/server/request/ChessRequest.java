@@ -67,11 +67,11 @@ public class ChessRequest {
         this.playerColor = playerColor;
     }
 
-    public int getGameID() {
+    public Integer getGameID() {
         return gameID;
     }
 
-    public void setGameID(int gameID) {
+    public void setGameID(Integer gameID) {
         this.gameID = gameID;
     }
 
