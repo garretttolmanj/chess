@@ -5,18 +5,20 @@ import server.request.ChessRequest;
 import server.response.ErrorResponse;
 import server.response.ResponseException;
 import server.response.ServerResponse;
-import service.UserService;
+import service.*;
 import spark.Request;
 import spark.Response;
 import com.google.gson.Gson;
 
 public class ClearHandler {
     private final UserService userService;
-
-    public ClearHandler(UserService userService) {
+    private final GameService gameService;
+    public ClearHandler(UserService userService, GameService gameService) {
         this.userService = userService;
+        this.gameService = gameService;
     }
-    public Object handleClear(Request req, Response res) throws DataAccessException {
+    public Object handleClear(Request req, Response res) {
+        gameService.clear();
         ServerResponse clearResponse = userService.clear();
         return new Gson().toJson(clearResponse);
     }

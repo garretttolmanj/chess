@@ -24,7 +24,7 @@ public class Server {
     private final ErrorHandler errorHandler;
 
     public Server() {
-        this.clearHandler = new ClearHandler(userService);
+        this.clearHandler = new ClearHandler(userService, gameService);
         this.registerHandler = new RegisterHandler(userService);
         this.loginHandler = new LoginHandler(userService);
         this.logoutHandler = new LogoutHandler(userService);

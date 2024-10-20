@@ -20,11 +20,10 @@ public class GameService {
     }
 
     // Clear the DAO's
-//    public ServerResponse clear() {
-//        gameAccess.clear();
-//        authAccess.clear();
-//        return new ServerResponse();
-//    }
+    public ServerResponse clear() {
+        gameAccess.clear();
+        return new ServerResponse();
+    }
 
     // Return a list of games
     public ServerResponse listGames(ChessRequest listGamesRequest) {
@@ -60,7 +59,7 @@ public class GameService {
         AuthData auth = authAccess.getAuth(authToken);
         if (auth == null) {
             throw new UnauthorizedException("Error: unauthorized");
-        } else {
+        }else {
             // Create a newGame
             int gameID;
             do {
@@ -74,6 +73,7 @@ public class GameService {
             return createGameResponse;
         }
     }
+
     private boolean isGameIDTaken(Integer gameID) {
         for (GameData game : gameAccess.listGames()) {
             if (game.gameID() == gameID) {
