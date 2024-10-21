@@ -34,12 +34,6 @@ public class GameServiceTest {
         authMemory.createAuth(new AuthData(authToken, "garrett"));
         // Initialize the gameDAO and the service
         gameMemory = new MemoryGameDAO();
-        GameData testGame = new GameData(1234,
-                null,
-                null,
-                "Test Game",
-                new ChessGame());
-        gameMemory.createGame(testGame);
         gameService = new GameService(gameMemory, authMemory);
         // Initialize the test DAO's
         testGameMemory = new MemoryGameDAO();
@@ -50,6 +44,7 @@ public class GameServiceTest {
     @BeforeEach
     void resetTestMemory() {
         testGameMemory.clear();
+        gameMemory.clear();
         GameData testGame1 = new GameData(1234,
                 null,
                 null,
@@ -57,6 +52,7 @@ public class GameServiceTest {
                 new ChessGame());
 
         testGameMemory.createGame(testGame1);
+        gameMemory.createGame(testGame1);
     }
 
     @Test
@@ -109,7 +105,7 @@ public class GameServiceTest {
         assertEquals(2, gameMemory.length());
         assertEquals(testAuthMemory, authMemory);
         // Ensure the response matches the expected
-        assertNotEquals(null, createGameResponse.getGameID());
+        assertNotNull(createGameResponse.getGameID());
         // Remove the newGame for the other tests
         gameMemory.removeGame(createGameResponse.getGameID());
     }
@@ -128,6 +124,74 @@ public class GameServiceTest {
         // Ensure the DAO's aren't altered
         assertEquals(testGameMemory, gameMemory);
         assertEquals(testAuthMemory, authMemory);
+    }
 
+    @Test
+    void joinGamePositive() {
+        // update test DAO's
+        testGameMemory.removeGame(1234);
+        GameData testGame = new GameData(1234,
+                "garrett",
+                null,
+                "Test Game",
+                new ChessGame());
+        testGameMemory.createGame(testGame);
+        // Test gameService join Game, "WHITE"
+        ChessRequest joinGameRequest = new ChessRequest();
+        joinGameRequest.setPlayerColor("WHITE");
+        joinGameRequest.setGameID(1234);
+        joinGameRequest.setAuthToken(authToken);
+        ServerResponse joinGameResponse = gameService.joinGame(joinGameRequest);
+        // Test to make sure Data was updated correctly
+        assertEquals(testGameMemory, gameMemory);
+        assertEquals(testAuthMemory, authMemory);
+        // Make sure the response is what is expected
+        assertEquals(new ServerResponse(), joinGameResponse);
+    }
+
+    @Test
+    void joinGameNegative() {
+        // take a spot in the game
+        testGameMemory.removeGame(1234);
+        gameMemory.removeGame(1234);
+        GameData testGame = new GameData(1234,
+                "user",
+                null,
+                "Test Game",
+                new ChessGame());
+        gameMemory.createGame(testGame);
+        testGameMemory.createGame(testGame);
+        // Test bad authToken
+        ChessRequest joinGameRequest = new ChessRequest();
+        joinGameRequest.setPlayerColor("WHITE");
+        joinGameRequest.setGameID(1234);
+        joinGameRequest.setAuthToken("af14314eoij014u1");
+        assertThrows(UnauthorizedException.class, () -> gameService.joinGame(joinGameRequest));
+        // Test bad Request
+        ChessRequest joinGameRequest2 = new ChessRequest();
+        joinGameRequest2.setPlayerColor("RED");
+        joinGameRequest2.setGameID(1234);
+        joinGameRequest2.setAuthToken(authToken);
+        assertThrows(BadRequestException.class, () -> gameService.joinGame(joinGameRequest2));
+        // Test bad Request
+        ChessRequest joinGameRequest3 = new ChessRequest();
+        joinGameRequest2.setPlayerColor("WHITE");
+        joinGameRequest2.setGameID(1234);
+        joinGameRequest2.setAuthToken(authToken);
+        assertThrows(AlreadyTakenException.class, () -> gameService.joinGame(joinGameRequest2));
+        // Ensure the DAO's aren't altered
+        assertEquals(testGameMemory, gameMemory);
+        assertEquals(testAuthMemory, authMemory);
+    }
+
+    @Test
+    void clear() {
+        // Clear the test DAOs
+        testGameMemory.clear();
+        // test clear method
+        var clearResponse = gameService.clear();
+        assertEquals(testGameMemory, gameMemory);
+        // Check to make sure response is correct
+        assertEquals(new ServerResponse(), clearResponse);
     }
 }

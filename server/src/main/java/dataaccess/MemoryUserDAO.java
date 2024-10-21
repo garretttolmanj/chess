@@ -13,7 +13,11 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void clear() {
-        users.clear();
+//        try {
+            users.clear();
+//        } else {
+//            throw new DataAccessException("Error: Data Access Error");
+//        }
     }
     @Override
     public void createUser(UserData userData) {
@@ -22,6 +26,10 @@ public class MemoryUserDAO implements UserDAO {
     @Override
     public UserData getUser(String username) {
         return users.getOrDefault(username, null);
+    }
+    @Override
+    public void removeUser(String username) {
+        users.remove(username);
     }
 
     @Override

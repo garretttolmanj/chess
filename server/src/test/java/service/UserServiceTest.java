@@ -51,7 +51,13 @@ public class UserServiceTest {
         testAuthMemory.clear();
         UserData testUser1 = new UserData("garrett", "johnson", "garrett@email.com");
         testUserMemory.createUser(testUser1);
+
+        userMemory.clear();
+        authMemory.clear();
+        userMemory.createUser(testUser1);
+
         authToken = null;
+        assertNotNull(userMemory.getUser("garrett"));
     }
 
     @Test
@@ -73,7 +79,8 @@ public class UserServiceTest {
 
         // Check to see if the service response is what is expected
         assertEquals("user", registerResponse.getUsername());
-        assertNotEquals(UUID.randomUUID().toString(), registerResponse.getAuthToken());
+        assertNotNull(registerResponse.getAuthToken());
+        // R
 
     }
     @Test
@@ -110,7 +117,7 @@ public class UserServiceTest {
 
         // Make sure the response is as expected
         assertEquals("garrett", loginResponse.getUsername());
-        assertNotEquals(UUID.randomUUID().toString(), loginResponse.getAuthToken());
+        assertNotNull(loginResponse.getAuthToken());
     }
 
     @Test
