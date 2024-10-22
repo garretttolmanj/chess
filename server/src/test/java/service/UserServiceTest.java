@@ -4,16 +4,12 @@ package service;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
 import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.request.ChessRequest;
-import server.response.ResponseException;
 import server.response.ServerResponse;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,6 +41,7 @@ public class UserServiceTest {
         testUserMemory = new MemoryUserDAO();
         testAuthMemory = new MemoryAuthDAO();
     }
+
     @BeforeEach
     void resetTestMemory() {
         testUserMemory.clear();
@@ -83,6 +80,7 @@ public class UserServiceTest {
         // R
 
     }
+
     @Test
     void registerNegative() {
         // Test UserName Taken
@@ -104,7 +102,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void loginPositive() throws DataAccessException, ResponseException {
+    void loginPositive() {
         // Test successful login
         var loginRequest = new ChessRequest();
         loginRequest.setUsername("garrett");
@@ -121,7 +119,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void loginNegative() throws DataAccessException, ResponseException {
+    void loginNegative() {
         // Test non-existent username
         var request1 = new ChessRequest();
         request1.setUsername("user");

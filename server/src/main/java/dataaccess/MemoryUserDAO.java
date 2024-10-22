@@ -5,6 +5,10 @@ import model.UserData;
 import java.util.HashMap;
 import java.util.Objects;
 
+/**
+ * User Data Access Object. Only stores data during runtime.
+ */
+
 public class MemoryUserDAO implements UserDAO {
     final private HashMap<String, UserData> users = new HashMap<>();
 
@@ -13,20 +17,19 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void clear() {
-//        try {
-            users.clear();
-//        } else {
-//            throw new DataAccessException("Error: Data Access Error");
-//        }
+        users.clear();
     }
+
     @Override
     public void createUser(UserData userData) {
         users.put(userData.username(), userData);
     }
+
     @Override
     public UserData getUser(String username) {
         return users.getOrDefault(username, null);
     }
+
     @Override
     public void removeUser(String username) {
         users.remove(username);

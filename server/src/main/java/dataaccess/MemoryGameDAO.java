@@ -5,10 +5,15 @@ import model.GameData;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MemoryGameDAO implements GameDAO{
+/**
+ * Game Data Access Object. Only stores data during runtime.
+ */
+
+public class MemoryGameDAO implements GameDAO {
     final private ArrayList<GameData> games = new ArrayList<>();
 
-    public MemoryGameDAO() {}
+    public MemoryGameDAO() {
+    }
 
     @Override
     public void clear() {
@@ -24,6 +29,7 @@ public class MemoryGameDAO implements GameDAO{
     public void createGame(GameData game) {
         games.add(game);
     }
+
     @Override
     public void removeGame(Integer gameID) {
         games.removeIf(game -> game.gameID() == gameID);
@@ -51,6 +57,7 @@ public class MemoryGameDAO implements GameDAO{
     public int hashCode() {
         return Objects.hashCode(games);
     }
+
     public int length() {
         return games.size();
     }

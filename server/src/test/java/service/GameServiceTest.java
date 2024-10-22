@@ -1,10 +1,12 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.*;
+import dataaccess.DataAccessException;
+import dataaccess.MemoryAuthDAO;
+import dataaccess.MemoryGameDAO;
+import dataaccess.MemoryUserDAO;
 import model.AuthData;
 import model.GameData;
-import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,7 @@ public class GameServiceTest {
         assertEquals(expectedResponse, listGamesResponse);
 
     }
+
     @Test
     void listGamesNegative() {
         // Try a bad authToken
@@ -127,7 +130,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void joinGamePositive() {
+    void joinGamePositive() throws DataAccessException {
         // update test DAO's
         testGameMemory.removeGame(1234);
         GameData testGame = new GameData(1234,

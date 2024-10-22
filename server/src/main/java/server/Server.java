@@ -1,12 +1,11 @@
 package server;
 
+import com.google.gson.Gson;
 import dataaccess.*;
 import server.handler.*;
-import server.request.ChessRequest;
-import server.response.*;
-import spark.*;
-import com.google.gson.Gson;
+import server.response.ErrorResponse;
 import service.*;
+import spark.Spark;
 
 public class Server {
     //Set up the Services and Data Access Objects
@@ -22,7 +21,6 @@ public class Server {
     private final ListGamesHandler listGamesHandler;
     private final CreateGameHandler createGameHandler;
     private final JoinGameHandler joinGameHandler;
-    private final ErrorHandler errorHandler;
 
     public Server() {
         this.clearHandler = new ClearHandler(userService, gameService);
@@ -32,21 +30,21 @@ public class Server {
         this.listGamesHandler = new ListGamesHandler(gameService);
         this.createGameHandler = new CreateGameHandler(gameService);
         this.joinGameHandler = new JoinGameHandler(gameService);
-        this.errorHandler = new ErrorHandler();
     }
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints and handle exceptions here.
-        Spark.delete("/db", clearHandler::handleClear);
-        Spark.post("/user", registerHandler::handleRegister);
-        Spark.post("/session", loginHandler::handleLogin);
-        Spark.delete("/session", logoutHandler::handleLogout);
-        Spark.get("/game", listGamesHandler::handleListGames);
-        Spark.post("/game", createGameHandler::handleCreateGame);
-        Spark.put("/game", joinGameHandler::handleJoinGame);
+        // Chess Endpoints
+        Spark.delete("/db", clearHandler::handleRequest);
+        Spark.post("/user", registerHandler::handleRequest);
+        Spark.post("/session", loginHandler::handleRequest);
+        Spark.delete("/session", logoutHandler::handleRequest);
+        Spark.get("/game", listGamesHandler::handleRequest);
+        Spark.post("/game", createGameHandler::handleRequest);
+        Spark.put("/game", joinGameHandler::handleRequest);
 
         // Exception Handling
         Spark.exception(BadRequestException.class, (e, req, res) -> {
@@ -74,9 +72,6 @@ public class Server {
             res.status(404);
             return new Gson().toJson(new ErrorResponse("Error: path not found"));
         });
-
-        // This line initializes the server and can be removed once you have a functioning endpoint
-        Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();

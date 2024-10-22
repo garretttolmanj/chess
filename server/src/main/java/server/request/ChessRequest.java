@@ -1,5 +1,9 @@
 package server.request;
 
+/**
+ * Object that gets translated from a JSON request.
+ * It contains all the possible parameters and has default null values.
+ */
 public class ChessRequest {
     private String username;
     private String password;

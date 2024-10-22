@@ -1,11 +1,14 @@
 package server.response;
 
-import chess.ChessGame;
 import service.GameInfo;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * Object that gets translated to JSON after a successful service call.
+ * It contains all the possible parameters with null default values.
+ */
 
 public class ServerResponse {
     private String username;

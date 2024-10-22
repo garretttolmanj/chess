@@ -5,10 +5,15 @@ import model.AuthData;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class MemoryAuthDAO implements AuthDAO{
+/**
+ * Auth Data Access Object. Only stores data during runtime.
+ */
+
+public class MemoryAuthDAO implements AuthDAO {
     final private HashMap<String, AuthData> sessions = new HashMap<>();
 
-    public MemoryAuthDAO() {}
+    public MemoryAuthDAO() {
+    }
 
     @Override
     public void clear() {
@@ -16,7 +21,7 @@ public class MemoryAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void createAuth(AuthData authData){
+    public void createAuth(AuthData authData) {
         sessions.put(authData.authToken(), authData);
     }
 
@@ -36,6 +41,7 @@ public class MemoryAuthDAO implements AuthDAO{
                 "sessions=" + sessions +
                 '}';
     }
+
     @Override
     public int length() {
         return sessions.size();

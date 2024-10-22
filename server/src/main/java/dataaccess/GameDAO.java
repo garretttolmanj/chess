@@ -6,9 +6,13 @@ import java.util.ArrayList;
 
 public interface GameDAO {
     void clear();
+
     ArrayList<GameData> listGames();
+
     void createGame(GameData game);
+
     void removeGame(Integer gameID);
+
     GameData getGame(Integer gameID);
 //    createGame: Create a new game.
 //    getGame: Retrieve a specified game with the given game ID.
