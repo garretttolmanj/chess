@@ -30,10 +30,10 @@ public class MemoryUserDAO implements UserDAO {
         return users.getOrDefault(username, null);
     }
 
-    @Override
-    public void removeUser(String username) {
-        users.remove(username);
-    }
+//    @Override
+//    public void removeUser(String username) {
+//        users.remove(username);
+//    }
 
     @Override
     public String toString() {
@@ -44,8 +44,12 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MemoryUserDAO that = (MemoryUserDAO) o;
         return Objects.equals(users, that.users);
     }

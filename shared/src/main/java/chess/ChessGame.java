@@ -49,8 +49,7 @@ public class ChessGame {
      * Gets a valid moves for a piece at the given location
      *
      * @param startPosition the piece to get valid moves for
-     * @return Set of valid moves for requested piece, or null if no piece at
-     * startPosition
+     * @return Set of valid moves for requested piece, or null
      */
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
@@ -239,8 +238,12 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessGame chessGame = (ChessGame) o;
         return playerTurn == chessGame.playerTurn && Objects.equals(gameBoard, chessGame.gameBoard);
     }

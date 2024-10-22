@@ -9,5 +9,5 @@ public interface UserDAO {
 
     UserData getUser(String username);
 
-    void removeUser(String username);
+//    void removeUser(String username);
 }

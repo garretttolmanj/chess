@@ -57,10 +57,17 @@ public class ServerResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ServerResponse that = (ServerResponse) o;
-        return Objects.equals(username, that.username) && Objects.equals(authToken, that.authToken) && Objects.equals(games, that.games) && Objects.equals(gameID, that.gameID);
+        return Objects.equals(username, that.username) &&
+                Objects.equals(authToken, that.authToken) &&
+                Objects.equals(games, that.games) &&
+                Objects.equals(gameID, that.gameID);
     }
 
     @Override

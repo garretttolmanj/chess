@@ -49,8 +49,12 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         MemoryAuthDAO that = (MemoryAuthDAO) o;
         return Objects.equals(sessions, that.sessions);
     }

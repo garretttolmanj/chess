@@ -7,7 +7,11 @@ public class PawnCalc extends PieceMovesCalculator {
     public PawnCalc() {
     }
 
-    private void oneMove(ChessBoard board, ChessPosition position, Collection<ChessMove> moves, int direction, int promotionRow) {
+    private void oneMove(ChessBoard board,
+                         ChessPosition position,
+                         Collection<ChessMove> moves,
+                         int direction,
+                         int promotionRow) {
         int newRow = position.getRow() + direction;
         int column = position.getColumn();
 
@@ -21,7 +25,11 @@ public class PawnCalc extends PieceMovesCalculator {
         }
     }
 
-    private void twoMoves(ChessBoard board, ChessPosition position, Collection<ChessMove> moves, int direction, int startRow) {
+    private void twoMoves(ChessBoard board,
+                          ChessPosition position,
+                          Collection<ChessMove> moves,
+                          int direction,
+                          int startRow) {
         int row = position.getRow();
         int column = position.getColumn();
 
@@ -36,7 +44,13 @@ public class PawnCalc extends PieceMovesCalculator {
 
     }
 
-    private void attackMove(ChessBoard board, ChessPosition position, Collection<ChessMove> moves, ChessPiece piece, int newColumn, int direction, int promotionRow) {
+    private void attackMove(ChessBoard board,
+                            ChessPosition position,
+                            Collection<ChessMove> moves,
+                            ChessPiece piece,
+                            int newColumn,
+                            int direction,
+                            int promotionRow) {
         int newRow = position.getRow() + direction;
 
         ChessPosition attackPosition = new ChessPosition(newRow, newColumn);
