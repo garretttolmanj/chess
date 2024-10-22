@@ -30,11 +30,6 @@ public class MemoryUserDAO implements UserDAO {
         return users.getOrDefault(username, null);
     }
 
-//    @Override
-//    public void removeUser(String username) {
-//        users.remove(username);
-//    }
-
     @Override
     public String toString() {
         return "MemoryUserDAO{" +
