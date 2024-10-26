@@ -4,6 +4,7 @@ import dataaccess.AuthDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.request.ChessRequest;
 import server.response.ServerResponse;
 
@@ -36,8 +37,9 @@ public class UserService extends Service {
         if (username == null || password == null || email == null) {
             throw new BadRequestException("Error: bad request");
         }
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        UserData userData = new UserData(username, password, email);
+        UserData userData = new UserData(username, hashedPassword, email);
 
         if (userAccess.getUser(username) == null) {
             userAccess.createUser(userData);
@@ -69,7 +71,7 @@ public class UserService extends Service {
             throw new UnauthorizedException("Error: unauthorized");
         }
 
-        if (userData.password().equals(password)) {
+        if (BCrypt.checkpw(password, userData.password())) {
             String token = UUID.randomUUID().toString();
             AuthData authData = new AuthData(token, username);
             authAccess.createAuth(authData);

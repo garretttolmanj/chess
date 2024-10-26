@@ -8,6 +8,7 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import server.request.ChessRequest;
 import server.response.ServerResponse;
 
@@ -30,7 +31,8 @@ public class UserServiceTest {
     @BeforeAll
     public static void setUp() {
         // Create a test user and the necessary DAOs
-        UserData testUser = new UserData("garrett", "johnson", "garrett@email.com");
+        String hashedPassword = BCrypt.hashpw("johnson", BCrypt.gensalt());
+        UserData testUser = new UserData("garrett", hashedPassword, "garrett@email.com");
 
         userMemory = new MemoryUserDAO();
         authMemory = new MemoryAuthDAO();
@@ -46,7 +48,8 @@ public class UserServiceTest {
     void resetTestMemory() {
         testUserMemory.clear();
         testAuthMemory.clear();
-        UserData testUser1 = new UserData("garrett", "johnson", "garrett@email.com");
+        String hashedPassword = BCrypt.hashpw("johnson", BCrypt.gensalt());
+        UserData testUser1 = new UserData("garrett", hashedPassword, "garrett@email.com");
         testUserMemory.createUser(testUser1);
 
         userMemory.clear();
@@ -60,7 +63,8 @@ public class UserServiceTest {
     @Test
     void registerPositive() throws DataAccessException {
         //update the test Memory
-        UserData testUser2 = new UserData("user", "password", "user@mail.com");
+        String hashedPassword = BCrypt.hashpw("password", BCrypt.gensalt());
+        UserData testUser2 = new UserData("user", hashedPassword, "user@mail.com");
         testUserMemory.createUser(testUser2);
 
         // Perform the register method
@@ -71,7 +75,7 @@ public class UserServiceTest {
         var registerResponse = userService.register(registerRequest);
 
         // Make sure the memory was updated correctly
-        assertEquals(testUserMemory, userMemory);
+        assertEquals(2, userMemory.length());
         assertEquals(1, authMemory.length());
 
         // Check to see if the service response is what is expected

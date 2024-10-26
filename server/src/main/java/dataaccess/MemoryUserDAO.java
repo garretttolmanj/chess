@@ -31,6 +31,11 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
+    public int length() {
+        return users.size();
+    }
+
+    @Override
     public String toString() {
         return "MemoryUserDAO{" +
                 "users=" + users +
