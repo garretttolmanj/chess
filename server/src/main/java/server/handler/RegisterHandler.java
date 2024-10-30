@@ -1,5 +1,6 @@
 package server.handler;
 
+import dataaccess.DataAccessException;
 import server.request.ChessRequest;
 import server.response.ServerResponse;
 import service.UserService;
@@ -12,7 +13,7 @@ public class RegisterHandler extends Handler {
     }
 
     @Override
-    protected ServerResponse handleRequest(ChessRequest request) {
+    protected ServerResponse handleRequest(ChessRequest request) throws DataAccessException {
         return userService.register(request);
     }
 }

@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
@@ -30,7 +31,7 @@ public class UserService extends Service {
     }
 
     // Registers a new user
-    public ServerResponse register(ChessRequest registerRequest) {
+    public ServerResponse register(ChessRequest registerRequest) throws DataAccessException {
         String username = registerRequest.getUsername();
         String password = registerRequest.getPassword();
         String email = registerRequest.getEmail();

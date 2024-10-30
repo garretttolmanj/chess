@@ -5,27 +5,14 @@ import model.AuthData;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class SqlAuthDAO implements AuthDAO {
 
-    private static final Properties properties = new Properties();
-    private static final String PROPERTIES_FILE = "src/main/resources/db.properties";
-
-    // Static block to load properties once when the class is loaded
-    static {
-        try (InputStream input = new FileInputStream(PROPERTIES_FILE)) {
-            properties.load(input);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new RuntimeException("Failed to load db.properties file", ex);
-        }
+    public SqlAuthDAO() throws DataAccessException {
+        configureDatabase();
     }
-
-    // Retrieve properties as needed
-    public static final String user = properties.getProperty("db.user");
-    public static final String password = properties.getProperty("db.password");
-    public static final String url = properties.getProperty("db.url");
 
     @Override
     public void clear() {
@@ -50,5 +37,19 @@ public class SqlAuthDAO implements AuthDAO {
     @Override
     public int length() {
         return 0;
+    }
+
+    private void configureDatabase() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+//            for (var statement : createStatements) {
+//                try (var preparedStatement = conn.prepareStatement(statement)) {
+//                    preparedStatement.executeUpdate();
+//                }
+//            }
+            System.out.println("Successful");
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
     }
 }
