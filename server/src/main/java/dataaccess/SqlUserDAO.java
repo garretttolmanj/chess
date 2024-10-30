@@ -35,20 +35,67 @@ public class SqlUserDAO implements UserDAO {
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-
-        var id = executeUpdate(statement, userData.username(), userData.password(), userData.email());
+        executeUpdate(statement, userData.username(), userData.password(), userData.email());
 //        return new Pet(id, pet.name(), pet.type());
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(String username) throws DataAccessException {
+        if (username == null || username.isEmpty()) {
+            throw new DataAccessException("username can't be empty");
+        }
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, password, email FROM user WHERE username=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        var user = rs.getString(1);
+                        var password = rs.getString(2);
+                        var email = rs.getString(3);
+                        return new UserData(user, password, email);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
         return null;
     }
 
     @Override
-    public int length() {
-        return 0;
+    public int length() throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT COUNT(*) FROM user";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) { // Move to the first row of the result
+                        return rs.getInt(1); // Retrieve the count by index
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return 0; // Return 0 if no rows were found (unlikely with COUNT(*))
     }
+
+//    private int executeQuery(String statement, Object... params) {
+//        var result = new ArrayList<>();
+//        try (var conn = DatabaseManager.getConnection()) {
+//            var statement = "SELECT id, json FROM pet";
+//            try (var ps = conn.prepareStatement(statement)) {
+//                try (var rs = ps.executeQuery()) {
+//                    while (rs.next()) {
+//                        result.add(readPet(rs));
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
+//        }
+//        return result;
+//    }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
@@ -70,7 +117,7 @@ public class SqlUserDAO implements UserDAO {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+            throw new DataAccessException(e.getMessage());
         }
     }
 
@@ -79,9 +126,10 @@ public class SqlUserDAO implements UserDAO {
             CREATE TABLE IF NOT EXISTS  user (
               `username` varchar(256) NOT NULL,
               `password` varchar(256) NOT NULL,
-              `email` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
+
     };
 
     private void configureDatabase() throws DataAccessException {
@@ -92,7 +140,6 @@ public class SqlUserDAO implements UserDAO {
                     preparedStatement.executeUpdate();
                 }
             }
-            System.out.println("Successful");
         } catch (SQLException ex) {
             throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }

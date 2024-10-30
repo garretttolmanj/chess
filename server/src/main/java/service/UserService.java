@@ -59,7 +59,7 @@ public class UserService extends Service {
     }
 
     // Logs in a user by creating a new session
-    public ServerResponse login(ChessRequest loginRequest) {
+    public ServerResponse login(ChessRequest loginRequest) throws DataAccessException {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
         if (username == null || password == null) {

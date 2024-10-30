@@ -106,7 +106,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void loginPositive() {
+    void loginPositive() throws DataAccessException {
         // Test successful login
         var loginRequest = new ChessRequest();
         loginRequest.setUsername("garrett");
@@ -142,7 +142,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logoutPositive() {
+    void logoutPositive() throws DataAccessException {
         // First log in existing user
         var loginRequest = new ChessRequest();
         loginRequest.setUsername("garrett");
@@ -163,7 +163,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void logoutNegative() {
+    void logoutNegative() throws DataAccessException {
         // First log in existing user
         var loginRequest = new ChessRequest();
         loginRequest.setUsername("garrett");
