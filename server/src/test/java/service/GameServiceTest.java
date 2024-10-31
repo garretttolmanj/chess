@@ -79,7 +79,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void listGamesNegative() {
+    void listGamesNegative() throws DataAccessException{
         // Try a bad authToken
         ChessRequest listGamesRequests = new ChessRequest();
         listGamesRequests.setAuthToken("3aef6a15efaf6");
@@ -114,7 +114,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void createGameNegative() {
+    void createGameNegative() throws DataAccessException{
         // Test bad authToken
         ChessRequest createGameRequest = new ChessRequest();
         createGameRequest.setGameName("Test Game 2");

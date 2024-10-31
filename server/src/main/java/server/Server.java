@@ -22,7 +22,7 @@ public class Server {
     private final CreateGameHandler createGameHandler;
     private final JoinGameHandler joinGameHandler;
 
-    public Server() throws DataAccessException {
+    public Server() {
         this.clearHandler = new ClearHandler(userService, gameService);
         this.registerHandler = new RegisterHandler(userService);
         this.loginHandler = new LoginHandler(userService);

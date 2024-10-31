@@ -13,7 +13,7 @@ import static java.sql.Types.NULL;
 
 public class SqlGameDAO implements GameDAO{
 
-    public SqlGameDAO() throws DataAccessException {
+    public SqlGameDAO()  {
         configureDatabase();
     }
 
@@ -25,7 +25,7 @@ public class SqlGameDAO implements GameDAO{
     }
 
     @Override
-    public ArrayList<GameData> listGames() throws DataAccessException {
+    public ArrayList<GameData> listGames() {
         ArrayList<GameData> gameList = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game";
@@ -42,8 +42,8 @@ public class SqlGameDAO implements GameDAO{
                     }
                 }
             }
-        } catch (SQLException | DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
         return gameList;
     }
@@ -143,7 +143,7 @@ public class SqlGameDAO implements GameDAO{
 
     };
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureDatabase() {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
@@ -152,7 +152,7 @@ public class SqlGameDAO implements GameDAO{
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException(ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
     }
 }
