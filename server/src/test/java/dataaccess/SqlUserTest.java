@@ -34,6 +34,25 @@ public class SqlUserTest {
     }
 
     @Test
+    public void clear() throws DataAccessException {
+        sqlUserDAO.clear();
+        assertEquals(0, sqlUserDAO.length());
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)")) {
+                ps.setString(1, "user");
+                ps.setString(2, "pass");
+                ps.setString(3, "mail.com");
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        assertEquals(1, sqlUserDAO.length());
+        sqlUserDAO.clear();
+        assertEquals(0, sqlUserDAO.length());
+    }
+
+    @Test
     public void createUserPositive() throws DataAccessException {
         UserData testUser = new UserData("user", "password", "email@mail.com");
         sqlUserDAO.createUser(testUser);

@@ -183,7 +183,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         // Clear the test DAOs
         testUserMemory.clear();
         testAuthMemory.clear();

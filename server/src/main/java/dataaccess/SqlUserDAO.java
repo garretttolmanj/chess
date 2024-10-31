@@ -28,15 +28,15 @@ public class SqlUserDAO implements UserDAO {
     }
 
     @Override
-    public void clear() {
-
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE TABLE user";
+        executeUpdate(statement);
     }
 
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         executeUpdate(statement, userData.username(), userData.password(), userData.email());
-//        return new Pet(id, pet.name(), pet.type());
     }
 
     @Override

@@ -58,7 +58,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void listGamesPositive() {
+    void listGamesPositive() throws DataAccessException {
         // Get game list
         ChessRequest listGamesRequest = new ChessRequest();
         listGamesRequest.setAuthToken(authToken);
@@ -90,7 +90,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void createGamePositive() {
+    void createGamePositive() throws DataAccessException {
         // update test DAO's
         GameData testGame2 = new GameData(123455,
                 null,

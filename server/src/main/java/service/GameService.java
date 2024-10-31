@@ -30,7 +30,7 @@ public class GameService extends Service {
     }
 
     // Return a list of games
-    public ServerResponse listGames(ChessRequest listGamesRequest) {
+    public ServerResponse listGames(ChessRequest listGamesRequest) throws DataAccessException {
         String authToken = listGamesRequest.getAuthToken();
         checkAuthToken(authToken);
         ArrayList<GameData> games = gameAccess.listGames();
@@ -49,7 +49,7 @@ public class GameService extends Service {
     }
 
     // Creates and new game.
-    public ServerResponse createGame(ChessRequest createGameRequest) {
+    public ServerResponse createGame(ChessRequest createGameRequest) throws DataAccessException {
         String gameName = createGameRequest.getGameName();
         // Verify that the request is valid
         if (gameName == null) {

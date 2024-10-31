@@ -24,7 +24,7 @@ public class UserService extends Service {
     }
 
     // Clears all the data stored in the database.
-    public ServerResponse clear() {
+    public ServerResponse clear() throws DataAccessException {
         userAccess.clear();
         authAccess.clear();
         return new ServerResponse();
@@ -87,7 +87,7 @@ public class UserService extends Service {
     }
 
     // Logs out a user by deleting the session.
-    public ServerResponse logout(ChessRequest request) {
+    public ServerResponse logout(ChessRequest request) throws DataAccessException {
         String authToken = request.getAuthToken();
         checkAuthToken(authToken);
         authAccess.deleteAuth(authToken);
