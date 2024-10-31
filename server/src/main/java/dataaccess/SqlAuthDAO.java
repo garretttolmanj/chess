@@ -50,13 +50,12 @@ public class SqlAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData deleteAuth(String authToken) throws DataAccessException {
+    public void deleteAuth(String authToken) throws DataAccessException {
         if (authToken == null || authToken.isEmpty()) {
             throw new DataAccessException("authToken can't be empty");
         }
         var statement = "DELETE FROM auth WHERE authToken =?";
         executeUpdate(statement, authToken);
-        return null;
     }
 
     @Override

@@ -64,6 +64,15 @@ public class SqlUserDAO implements UserDAO {
     }
 
     @Override
+    public void removeUser(String username) throws DataAccessException {
+        if (username == null || username.isEmpty()) {
+            throw new DataAccessException("username can't be empty");
+        }
+        var statement = "DELETE FROM user WHERE username =?";
+        executeUpdate(statement, username);
+    }
+
+    @Override
     public int length() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT COUNT(*) FROM user";
@@ -79,6 +88,7 @@ public class SqlUserDAO implements UserDAO {
         }
         return 0; // Return 0 if no rows were found (unlikely with COUNT(*))
     }
+
 
 //    private int executeQuery(String statement, Object... params) {
 //        var result = new ArrayList<>();

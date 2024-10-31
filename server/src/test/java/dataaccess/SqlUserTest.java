@@ -106,6 +106,29 @@ public class SqlUserTest {
         assertThrows(DataAccessException.class, () -> sqlUserDAO.getUser(""));
     }
 
+    public void deleteUserPositive() throws DataAccessException {
+        String[][] params = {{"user1", "password", "email1.mail"}, {"user2", "pass", "email2.com"}};
+        try (var conn = DatabaseManager.getConnection()) {
+            for (String[] item : params) {
+                try (var ps = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES (?, ?, ?)")) {
+                    ps.setString(1, item[0]);
+                    ps.setString(2, item[1]);
+                    ps.setString(3, item[2]);
+                    ps.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        sqlUserDAO.removeUser("user1");
+        assertEquals(1, sqlUserDAO.length());
+    }
+
+    @Test
+    public void deleteAuthNegative() throws DataAccessException {
+        assertThrows(DataAccessException.class, () -> sqlUserDAO.removeUser(null));
+    }
+
     @Test
     public void lengthPositive() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {

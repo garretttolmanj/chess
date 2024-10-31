@@ -9,8 +9,8 @@ import spark.Spark;
 
 public class Server {
     //Set up the Services and Data Access Objects
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final UserService userService = new UserService(new MemoryUserDAO(), authDAO);
+    private final AuthDAO authDAO = new SqlAuthDAO();
+    private final UserService userService = new UserService(new SqlUserDAO(), authDAO);
     private final GameService gameService = new GameService(new MemoryGameDAO(), authDAO);
 
     //Set up handlers
@@ -22,7 +22,7 @@ public class Server {
     private final CreateGameHandler createGameHandler;
     private final JoinGameHandler joinGameHandler;
 
-    public Server() {
+    public Server() throws DataAccessException {
         this.clearHandler = new ClearHandler(userService, gameService);
         this.registerHandler = new RegisterHandler(userService);
         this.loginHandler = new LoginHandler(userService);

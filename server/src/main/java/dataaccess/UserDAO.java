@@ -11,5 +11,5 @@ public interface UserDAO {
 
     int length() throws DataAccessException;
 
-//    void removeUser(String username);
+    void removeUser(String username) throws DataAccessException;
 }
