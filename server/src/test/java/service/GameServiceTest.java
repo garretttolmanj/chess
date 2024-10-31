@@ -188,7 +188,7 @@ public class GameServiceTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         // Clear the test DAOs
         testGameMemory.clear();
         // test clear method

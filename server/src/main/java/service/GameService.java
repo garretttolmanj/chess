@@ -24,7 +24,7 @@ public class GameService extends Service {
     }
 
     // Clears all the data in the database.
-    public ServerResponse clear() {
+    public ServerResponse clear() throws DataAccessException {
         gameAccess.clear();
         return new ServerResponse();
     }
@@ -72,7 +72,7 @@ public class GameService extends Service {
     }
 
     // CREATE GAME HELPER FUNCTION. Checks to see if a gameID has been taken to ensure that no 2 games have the same ID.
-    private boolean isGameIDTaken(Integer gameID) {
+    private boolean isGameIDTaken(Integer gameID) throws DataAccessException {
         for (GameData game : gameAccess.listGames()) {
             if (game.gameID() == gameID) {
                 return true;

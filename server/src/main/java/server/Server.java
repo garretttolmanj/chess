@@ -11,7 +11,7 @@ public class Server {
     //Set up the Services and Data Access Objects
     private final AuthDAO authDAO = new SqlAuthDAO();
     private final UserService userService = new UserService(new SqlUserDAO(), authDAO);
-    private final GameService gameService = new GameService(new MemoryGameDAO(), authDAO);
+    private final GameService gameService = new GameService(new SqlGameDAO(), authDAO);
 
     //Set up handlers
     private final ClearHandler clearHandler;
