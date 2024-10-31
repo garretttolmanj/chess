@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.io.FileInputStream;
@@ -41,17 +42,29 @@ public class SqlGameDAO implements GameDAO{
         return null;
     }
 
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  game (
+              `gameID` INT NOT NULL,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `game` TEXT NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+
+    };
+
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
-//            for (var statement : createStatements) {
-//                try (var preparedStatement = conn.prepareStatement(statement)) {
-//                    preparedStatement.executeUpdate();
-//                }
-//            }
-            System.out.println("Successful");
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
         } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(ex.getMessage());
         }
     }
 }
