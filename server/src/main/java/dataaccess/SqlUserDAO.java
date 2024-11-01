@@ -54,23 +54,25 @@ public class SqlUserDAO extends SqlBase implements UserDAO {
         if (username == null || username.isEmpty()) {
             throw new DataAccessException("username can't be empty");
         }
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM user WHERE username=?";
-            try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, username);
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        var user = rs.getString(1);
-                        var password = rs.getString(2);
-                        var email = rs.getString(3);
-                        return new UserData(user, password, email);
+        UserData singleResult = executeQuerySingle(
+                "SELECT username, password, email FROM user WHERE username=?",
+                rs -> {
+                    try {
+                        return readUser(rs);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return null;
+                },
+                username
+        );
+        return singleResult;
+    }
+
+    private UserData readUser(ResultSet rs) throws SQLException {
+        var user = rs.getString("username");  // Can use column names for readability
+        var password = rs.getString("password");
+        var email = rs.getString("email");
+        return new UserData(user, password, email);
     }
 
     @Override
@@ -84,6 +86,19 @@ public class SqlUserDAO extends SqlBase implements UserDAO {
 
     @Override
     public int length() throws DataAccessException {
+//        int singleResult = executeQuerySingle(
+//                "SELECT username, password, email FROM user WHERE username=?",
+//                rs -> {
+//                    try {
+//                        return readUser(rs);
+//                    } catch (SQLException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                },
+//                username
+//        );
+//        return singleResult;
+
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT COUNT(*) FROM user";
             try (var ps = conn.prepareStatement(statement)) {
