@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.AuthData;
-import model.UserData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +16,14 @@ public class SqlAuthTest {
     public static void setUp() throws DataAccessException {
         sqlAuthDAO = new SqlAuthDAO();
     }
+
     @BeforeEach
     public void deleteTable() throws DataAccessException {
+        dropAuthTable();
+        sqlAuthDAO = new SqlAuthDAO();
+    }
+
+    private void dropAuthTable() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("DROP TABLE auth")) {
                 ps.executeUpdate();
@@ -26,25 +31,30 @@ public class SqlAuthTest {
         } catch (SQLException e) {
             throw new DataAccessException("Unable to delete table");
         }
-        sqlAuthDAO = new SqlAuthDAO();
     }
 
     @Test
     public void clear() throws DataAccessException {
         sqlAuthDAO.clear();
         assertEquals(0, sqlAuthDAO.length());
+
+        insertAuthData("12345", "user");
+        assertEquals(1, sqlAuthDAO.length());
+
+        sqlAuthDAO.clear();
+        assertEquals(0, sqlAuthDAO.length());
+    }
+
+    private void insertAuthData(String authToken, String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
-                ps.setString(1, "12345");
-                ps.setString(2, "user");
+                ps.setString(1, authToken);
+                ps.setString(2, username);
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
-        assertEquals(1, sqlAuthDAO.length());
-        sqlAuthDAO.clear();
-        assertEquals(0, sqlAuthDAO.length());
     }
 
     @Test
@@ -52,14 +62,17 @@ public class SqlAuthTest {
         AuthData testAuth = new AuthData("12345", "user");
         sqlAuthDAO.createAuth(testAuth);
         assertEquals(1, sqlAuthDAO.length());
+        validateAuthData("12345", "user");
+    }
+
+    private void validateAuthData(String expectedAuthToken, String expectedUsername) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT authToken, username FROM auth";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        assertEquals("12345", rs.getString(1));
-                        assertEquals("user", rs.getString(2));
-                    }
+            try (var ps = conn.prepareStatement(statement);
+                 var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    assertEquals(expectedAuthToken, rs.getString(1));
+                    assertEquals(expectedUsername, rs.getString(2));
                 }
             }
         } catch (Exception e) {
@@ -75,22 +88,11 @@ public class SqlAuthTest {
 
     @Test
     public void getAuthPositive() throws DataAccessException {
-        // Test getting the auth when the authToken isn't in the database
-        AuthData test1 = sqlAuthDAO.getAuth("12345");
-        assertNull(test1);
-        // Test getting the auth when the authToken IS in the database
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
-                ps.setString(1, "12345");
-                ps.setString(2, "user");
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        AuthData test2 = sqlAuthDAO.getAuth("12345");
+        assertNull(sqlAuthDAO.getAuth("12345"));
+
+        insertAuthData("12345", "user");
         AuthData testAuth = new AuthData("12345", "user");
-        assertEquals(testAuth, test2);
+        assertEquals(testAuth, sqlAuthDAO.getAuth("12345"));
     }
 
     @Test
@@ -101,18 +103,9 @@ public class SqlAuthTest {
 
     @Test
     public void deleteAuthPositive() throws DataAccessException {
-        String[][] params = {{"12345", "user"}, {"56789", "user2"}};
-        try (var conn = DatabaseManager.getConnection()) {
-            for (String[] item : params) {
-                try (var ps = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
-                    ps.setString(1, item[0]);
-                    ps.setString(2, item[1]);
-                    ps.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
+        insertAuthData("12345", "user");
+        insertAuthData("56789", "user2");
+
         sqlAuthDAO.deleteAuth("12345");
         assertEquals(1, sqlAuthDAO.length());
     }
@@ -124,15 +117,7 @@ public class SqlAuthTest {
 
     @Test
     public void lengthPositive() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES (?, ?)")) {
-                ps.setString(1, "12345");
-                ps.setString(2, "user");
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
+        insertAuthData("12345", "user");
         assertEquals(1, sqlAuthDAO.length());
     }
 }

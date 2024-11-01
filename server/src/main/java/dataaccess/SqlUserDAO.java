@@ -61,15 +61,6 @@ public class SqlUserDAO extends SqlBase implements UserDAO {
     }
 
     @Override
-    public void removeUser(String username) throws DataAccessException {
-        if (username == null || username.isEmpty()) {
-            throw new DataAccessException("username can't be empty");
-        }
-        var statement = "DELETE FROM user WHERE username =?";
-        executeUpdate(statement, username);
-    }
-
-    @Override
     public int length() throws DataAccessException {
         int length = executeQuerySingle(
                 "SELECT COUNT(*) FROM user",
