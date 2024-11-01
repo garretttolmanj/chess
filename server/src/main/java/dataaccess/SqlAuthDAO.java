@@ -1,12 +1,9 @@
 package dataaccess;
 
 import model.AuthData;
-import model.GameData;
-
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class SqlAuthDAO extends SqlBase implements AuthDAO {
 
@@ -38,22 +35,26 @@ public class SqlAuthDAO extends SqlBase implements AuthDAO {
         if (authToken == null || authToken.isEmpty()) {
             throw new DataAccessException("authToken can't be empty");
         }
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT authToken, username FROM auth WHERE authToken=?";
-            try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, authToken);
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        var token = rs.getString(1);
-                        var username = rs.getString(2);
-                        return new AuthData(token, username);
+
+        AuthData auth = executeQuerySingle(
+                "SELECT authToken, username FROM auth WHERE authToken=?",
+                rs -> {
+                    try {
+                        return readAuth(rs);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return null;
+                },
+                authToken
+        );
+
+        return auth;
+    }
+
+    private AuthData readAuth(ResultSet rs) throws SQLException {
+        var token = rs.getString(1);
+        var username = rs.getString(2);
+        return new AuthData(token, username);
     }
 
     @Override
@@ -67,19 +68,17 @@ public class SqlAuthDAO extends SqlBase implements AuthDAO {
 
     @Override
     public int length() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT COUNT(*) FROM auth";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) { // Move to the first row of the result
-                        return rs.getInt(1); // Retrieve the count by index
+        int length = executeQuerySingle(
+                "SELECT COUNT(*) FROM auth",
+                rs -> {
+                    try {
+                        return rs.getInt(1);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return 0; // Return 0 if no rows were found (unlikely with COUNT(*))
+        );
+        return length;
     }
 
 }

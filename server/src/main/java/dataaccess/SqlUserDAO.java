@@ -1,24 +1,9 @@
 package dataaccess;
 
-import com.google.gson.Gson;
-import model.GameData;
 import model.UserData;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 
 public class SqlUserDAO extends SqlBase implements UserDAO {
@@ -86,52 +71,18 @@ public class SqlUserDAO extends SqlBase implements UserDAO {
 
     @Override
     public int length() throws DataAccessException {
-//        int singleResult = executeQuerySingle(
-//                "SELECT username, password, email FROM user WHERE username=?",
-//                rs -> {
-//                    try {
-//                        return readUser(rs);
-//                    } catch (SQLException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                },
-//                username
-//        );
-//        return singleResult;
-
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT COUNT(*) FROM user";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) { // Move to the first row of the result
-                        return rs.getInt(1); // Retrieve the count by index
+        int length = executeQuerySingle(
+                "SELECT COUNT(*) FROM user",
+                rs -> {
+                    try {
+                        return rs.getInt(1);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return 0; // Return 0 if no rows were found (unlikely with COUNT(*))
+        );
+        return length;
     }
-
-
-//    private int executeQuery(String statement, Object... params) {
-//        var result = new ArrayList<>();
-//        try (var conn = DatabaseManager.getConnection()) {
-//            var statement = "SELECT id, json FROM pet";
-//            try (var ps = conn.prepareStatement(statement)) {
-//                try (var rs = ps.executeQuery()) {
-//                    while (rs.next()) {
-//                        result.add(readPet(rs));
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new ResponseException(500, String.format("Unable to read data: %s", e.getMessage()));
-//        }
-//        return result;
-//    }
-
 
 }
 

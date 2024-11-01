@@ -2,14 +2,12 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import model.AuthData;
 import model.GameData;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 public class SqlGameDAO extends SqlBase implements GameDAO{
 
@@ -36,28 +34,21 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
     }
 
     @Override
-    public ArrayList<GameData> listGames() {
-        ArrayList<GameData> gameList = new ArrayList<>();
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        var id = rs.getInt(1);
-                        var whiteUsername = rs.getString(2);
-                        var blackUsername = rs.getString(3);
-                        var gameName = rs.getString(4);
-                        var jsonGame = rs.getString(5);
-                        var game = new Gson().fromJson(jsonGame, ChessGame.class);
-                        gameList.add(new GameData(id, whiteUsername, blackUsername, gameName, game));
+    public ArrayList<GameData> listGames() throws DataAccessException {
+        ArrayList<GameData> gameList = executeQueryList(
+                "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game",
+                rs -> {
+                    try {
+                        return readGame(rs);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        );
+
         return gameList;
     }
+
 
     @Override
     public void createGame(GameData game) throws DataAccessException {
@@ -80,42 +71,43 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
         if (gameID == null) {
             throw new DataAccessException("gameID can't be empty");
         }
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?";
-            try (var ps = conn.prepareStatement(statement)) {
-                ps.setInt(1, gameID);
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        var id = rs.getInt(1);
-                        var whiteUsername = rs.getString(2);
-                        var blackUsername = rs.getString(3);
-                        var gameName = rs.getString(4);
-                        var jsonGame = rs.getString(5);
-                        var game = new Gson().fromJson(jsonGame, ChessGame.class);
-                        return new GameData(id, whiteUsername, blackUsername, gameName, game);
+        GameData singleGame = executeQuerySingle(
+                "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?",
+                rs -> {
+                    try {
+                        return readGame(rs);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return null;
+                },
+                gameID
+        );
+
+        return singleGame;
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var id = rs.getInt(1);
+        var whiteUsername = rs.getString(2);
+        var blackUsername = rs.getString(3);
+        var gameName = rs.getString(4);
+        var jsonGame = rs.getString(5);
+        var game = new Gson().fromJson(jsonGame, ChessGame.class);
+        return new GameData(id, whiteUsername, blackUsername, gameName, game);
     }
 
     @Override
     public int length() throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT COUNT(*) FROM game";
-            try (var ps = conn.prepareStatement(statement)) {
-                try (var rs = ps.executeQuery()) {
-                    if (rs.next()) { // Move to the first row of the result
-                        return rs.getInt(1); // Retrieve the count by index
+        int length = executeQuerySingle(
+                "SELECT COUNT(*) FROM game",
+                rs -> {
+                    try {
+                        return rs.getInt(1);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
                     }
                 }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
-        }
-        return 0; // Return 0 if no rows were found (unlikely with COUNT(*))
+        );
+        return length;
     }
 }
