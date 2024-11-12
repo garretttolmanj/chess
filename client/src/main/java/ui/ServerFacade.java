@@ -1,7 +1,7 @@
 package ui;
 
 import com.google.gson.Gson;
-import requestResponse.ChessRequest;
+import requestResponse.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,36 +14,37 @@ import java.net.URL;
 public class ServerFacade {
     private final String serverUrl;
 
-    private final String serverUrl;
-
     public ServerFacade(String url) {
         serverUrl = url;
     }
 
 
-    public void register(String username, String password, String email) {
-        var path = "/pet";
+    public ServerResponse register(String username, String password, String email) {
+        var path = "/user";
         ChessRequest request = new ChessRequest();
-        this.makeRequest("POST", path, username, password, email);
+        request.setUsername(username);
+        request.setPassword(password);
+        request.setEmail(email);
+        return this.makeRequest("POST", path, request, ServerResponse.class);
     }
 
-    public void deletePet(int id) throws ResponseException {
-        var path = String.format("/pet/%s", id);
-        this.makeRequest("DELETE", path, null, null);
-    }
+//    public void deletePet(int id) throws ResponseException {
+//        var path = String.format("/pet/%s", id);
+//        this.makeRequest("DELETE", path, null, null);
+//    }
 
-    public void deleteAllPets() throws ResponseException {
-        var path = "/pet";
-        this.makeRequest("DELETE", path, null, null);
-    }
+//    public void deleteAllPets() throws ResponseException {
+//        var path = "/pet";
+//        this.makeRequest("DELETE", path, null, null);
+//    }
 
-    public Pet[] listPets() throws RuntimeException {
-        var path = "/pet";
-        record listPetResponse(Pet[] pet) {
-        }
-        var response = this.makeRequest("GET", path, null, listPetResponse.class);
-        return response.pet();
-    }
+//    public Pet[] listPets() throws RuntimeException {
+//        var path = "/pet";
+//        record listPetResponse(Pet[] pet) {
+//        }
+//        var response = this.makeRequest("GET", path, null, listPetResponse.class);
+//        return response.pet();
+//    }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws RuntimeException {
         try {
