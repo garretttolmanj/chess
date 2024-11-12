@@ -40,7 +40,7 @@ public class ChessClient {
             String username = params[0];
             String password = params[1];
             String email = params[3];
-//            server.register(username, password, email);
+            server.register(username, password, email);
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(visitorName);
             return String.format("You signed in as %s.", username);

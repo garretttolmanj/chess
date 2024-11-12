@@ -9,8 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
+import requestResponse.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

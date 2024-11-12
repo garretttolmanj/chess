@@ -6,9 +6,7 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
-
+import requestResponse.*;
 import java.util.UUID;
 
 public class UserService extends Service {

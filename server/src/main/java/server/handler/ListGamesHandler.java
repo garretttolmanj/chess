@@ -1,8 +1,7 @@
 package server.handler;
 
 import dataaccess.DataAccessException;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
+import requestResponse.*;
 import service.GameService;
 
 public class ListGamesHandler extends Handler {

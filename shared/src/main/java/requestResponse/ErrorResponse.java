@@ -1,4 +1,4 @@
-package server.response;
+package requestResponse;
 
 // Object that gets translated to JSON when an Exception is being handled.
 public class ErrorResponse {

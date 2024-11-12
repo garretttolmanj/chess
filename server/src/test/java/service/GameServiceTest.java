@@ -5,13 +5,11 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryUserDAO;
-import model.AuthData;
-import model.GameData;
+import model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
+import requestResponse.*;
 
 import java.util.ArrayList;
 import java.util.UUID;

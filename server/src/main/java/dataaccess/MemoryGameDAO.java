@@ -1,6 +1,6 @@
 package dataaccess;
 
-import model.GameData;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.Objects;

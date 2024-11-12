@@ -4,9 +4,8 @@ import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import model.GameData;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
+import model.*;
+import requestResponse.*;
 
 import java.util.ArrayList;
 import java.util.Random;

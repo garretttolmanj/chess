@@ -2,8 +2,7 @@ package server.handler;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import server.request.ChessRequest;
-import server.response.ServerResponse;
+import requestResponse.*;
 import spark.Request;
 import spark.Response;
 

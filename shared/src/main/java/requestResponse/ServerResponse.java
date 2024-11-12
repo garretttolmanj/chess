@@ -1,7 +1,6 @@
-package server.response;
+package requestResponse;
 
-import service.GameInfo;
-
+import model.GameInfo;
 import java.util.ArrayList;
 import java.util.Objects;
 
