@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.SqlAuthDAO;
 import dataaccess.SqlGameDAO;
 import dataaccess.SqlUserDAO;
+import model.GameData;
 import model.GameInfo;
 import org.junit.jupiter.api.*;
 import requestResponse.ChessRequest;
@@ -167,6 +168,62 @@ public class ServerFacadeTests {
         assertThrows(RuntimeException.class, () -> facade.createGame(null, null));
         // Wrong authToken
         assertThrows(RuntimeException.class, () -> facade.createGame("testGame", "123456789"));
+    }
+
+    @Test
+    public void joinGameTest() throws DataAccessException {
+        // Register a user
+        ChessRequest registerRequest = new ChessRequest();
+        registerRequest.setUsername("user");
+        registerRequest.setPassword("password");
+        registerRequest.setEmail("email.com");
+        String auth = userService.register(registerRequest).getAuthToken();
+        // Create a game
+        ChessRequest createRequest = new ChessRequest();
+        createRequest.setGameName("testGame");
+        createRequest.setAuthToken(auth);
+        ServerResponse createResponse = gameService.createGame(createRequest);
+        Integer gameID = createResponse.getGameID();
+        // Test the join Game function
+        ServerResponse response = facade.joinGame("WHITE",gameID, auth);
+        GameData game = sqlGameDAO.getGame(gameID);
+//        game.
+        Assertions.assertEquals("testGame", game.gameName());
+        Assertions.assertEquals("user", game.whiteUsername());
+        Assertions.assertNull(game.blackUsername());
+    }
+
+    @Test
+    public void joinGameNegative() throws DataAccessException {
+        // Register a user
+        ChessRequest registerRequest = new ChessRequest();
+        registerRequest.setUsername("user");
+        registerRequest.setPassword("password");
+        registerRequest.setEmail("email.com");
+        String auth = userService.register(registerRequest).getAuthToken();
+        // Game doesn't exist
+        assertThrows(RuntimeException.class, () -> facade.joinGame("WHITE", 1234, auth));
+        // Create a game
+        ChessRequest createRequest = new ChessRequest();
+        createRequest.setGameName("testGame");
+        createRequest.setAuthToken(auth);
+        ServerResponse createResponse = gameService.createGame(createRequest);
+        Integer gameID = createResponse.getGameID();
+        // Wrong authToken
+        assertThrows(RuntimeException.class, () -> facade.joinGame("WHITE", gameID, "123456789"));
+        //Already taken
+        ChessRequest registerRequest2 = new ChessRequest();
+        registerRequest2.setUsername("user2");
+        registerRequest2.setPassword("password");
+        registerRequest2.setEmail("email.com");
+        String auth2 = userService.register(registerRequest2).getAuthToken();
+        ChessRequest joinRequest = new ChessRequest();
+        joinRequest.setGameID(gameID);
+        joinRequest.setAuthToken(auth2);
+        joinRequest.setPlayerColor("WHITE");
+        gameService.joinGame(joinRequest);
+        //
+        assertThrows(RuntimeException.class, () -> facade.joinGame("WHITE", gameID, auth));
     }
 
 }

@@ -49,10 +49,11 @@ public class ServerFacade {
         return this.makeRequest("POST", path, request, ServerResponse.class, authToken);
     }
 
-    public ServerResponse joinGame(String gameName, String authToken) {
+    public ServerResponse joinGame(String playerColor, Integer gameID, String authToken) {
         var path = "/game";
         ChessRequest request = new ChessRequest();
-        request.setGameName(gameName);
+        request.setPlayerColor(playerColor);
+        request.setGameID(gameID);
         return this.makeRequest("PUT", path, request, ServerResponse.class, authToken);
     }
 
