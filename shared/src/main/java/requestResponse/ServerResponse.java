@@ -12,7 +12,7 @@ import java.util.Objects;
 public class ServerResponse {
     private String username;
     private String authToken;
-    private ArrayList games;
+    private ArrayList<GameInfo> games;
     private Integer gameID;
 
     public ServerResponse() {

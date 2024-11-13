@@ -37,6 +37,14 @@ public class ChessGame {
         playerTurn = team;
     }
 
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "playerTurn=" + playerTurn +
+                ", gameBoard=" + gameBoard +
+                '}';
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */

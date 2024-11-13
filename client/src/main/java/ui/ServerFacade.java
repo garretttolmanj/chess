@@ -25,7 +25,7 @@ public class ServerFacade {
         request.setUsername(username);
         request.setPassword(password);
         request.setEmail(email);
-        return this.makeRequest("POST", path, request, ServerResponse.class);
+        return this.makeRequest("POST", path, request, ServerResponse.class, null);
     }
 
     public ServerResponse login(String username, String password) {
@@ -33,42 +33,50 @@ public class ServerFacade {
         ChessRequest request = new ChessRequest();
         request.setUsername(username);
         request.setPassword(password);
-        return this.makeRequest("POST", path, request, ServerResponse.class);
+        return this.makeRequest("POST", path, request, ServerResponse.class, null);
     }
 
     public ServerResponse logout(String authToken) {
         var path = "/session";
         ChessRequest request = new ChessRequest();
-        request.setAuthToken(authToken);
-        return this.makeRequest("DELETE", path, request, ServerResponse.class);
+        return this.makeRequest("DELETE", path, request, ServerResponse.class, authToken);
     }
 
-//    public void deletePet(int id) throws ResponseException {
-//        var path = String.format("/pet/%s", id);
-//        this.makeRequest("DELETE", path, null, null);
-//    }
+    public ServerResponse createGame(String gameName, String authToken) {
+        var path = "/game";
+        ChessRequest request = new ChessRequest();
+        request.setGameName(gameName);
+        return this.makeRequest("POST", path, request, ServerResponse.class, authToken);
+    }
 
-//    public void deleteAllPets() throws ResponseException {
-//        var path = "/pet";
-//        this.makeRequest("DELETE", path, null, null);
-//    }
+    public ServerResponse joinGame(String gameName, String authToken) {
+        var path = "/game";
+        ChessRequest request = new ChessRequest();
+        request.setGameName(gameName);
+        return this.makeRequest("PUT", path, request, ServerResponse.class, authToken);
+    }
 
-//    public Pet[] listPets() throws RuntimeException {
-//        var path = "/pet";
-//        record listPetResponse(Pet[] pet) {
-//        }
-//        var response = this.makeRequest("GET", path, null, listPetResponse.class);
-//        return response.pet();
-//    }
+    public ServerResponse listGames(String authToken) {
+        var path = "/game";
+        ChessRequest request = new ChessRequest(); // The request object can be empty or hold other data if needed.
+        return this.makeRequest("GET", path, request, ServerResponse.class, authToken);
+    }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws RuntimeException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws RuntimeException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            http.setDoOutput(true);
 
-            writeBody(request, http);
+            // Set the Authorization header with the token passed as a parameter
+            http.setRequestProperty("Authorization", authToken);
+
+            // Only set DoOutput if the method needs to send a request body (e.g., "POST", "PUT")
+            if (!method.equalsIgnoreCase("GET")) {
+                http.setDoOutput(true);
+                writeBody(request, http);
+            }
+
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
@@ -76,7 +84,6 @@ public class ServerFacade {
             throw new RuntimeException(ex.getMessage());
         }
     }
-
 
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
@@ -88,10 +95,12 @@ public class ServerFacade {
         }
     }
 
+
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, RuntimeException {
         var status = http.getResponseCode();
+        var message = http.getResponseMessage();
         if (!isSuccessful(status)) {
-            throw new RuntimeException("failure: " + status);
+            throw new RuntimeException("failure " + status + ": " + message);
         }
     }
 
