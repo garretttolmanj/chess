@@ -28,6 +28,21 @@ public class ServerFacade {
         return this.makeRequest("POST", path, request, ServerResponse.class);
     }
 
+    public ServerResponse login(String username, String password) {
+        var path = "/session";
+        ChessRequest request = new ChessRequest();
+        request.setUsername(username);
+        request.setPassword(password);
+        return this.makeRequest("POST", path, request, ServerResponse.class);
+    }
+
+    public ServerResponse logout(String authToken) {
+        var path = "/session";
+        ChessRequest request = new ChessRequest();
+        request.setAuthToken(authToken);
+        return this.makeRequest("DELETE", path, request, ServerResponse.class);
+    }
+
 //    public void deletePet(int id) throws ResponseException {
 //        var path = String.format("/pet/%s", id);
 //        this.makeRequest("DELETE", path, null, null);
