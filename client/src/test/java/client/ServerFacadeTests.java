@@ -6,9 +6,7 @@ import dataaccess.SqlUserDAO;
 import org.junit.jupiter.api.*;
 import requestResponse.ChessRequest;
 import requestResponse.ServerResponse;
-import model.*;
 import server.Server;
-import service.AlreadyTakenException;
 import service.UserService;
 import ui.ServerFacade;
 
@@ -81,5 +79,26 @@ public class ServerFacadeTests {
         assertThrows(RuntimeException.class, () -> facade.login("user", null));
         // Wrong Password
         assertThrows(RuntimeException.class, () -> facade.login("user", "wrong"));
+    }
+
+    @Test
+    public void logoutTest() throws DataAccessException {
+        ChessRequest registerRequest = new ChessRequest();
+        registerRequest.setUsername("user");
+        registerRequest.setPassword("password");
+        registerRequest.setEmail("email.com");
+        String auth = userService.register(registerRequest).getAuthToken();
+        Assertions.assertEquals(1, sqlAuthDAO.length());
+        ServerResponse response = facade.logout(auth);
+        Assertions.assertEquals(0, sqlAuthDAO.length());
+        Assertions.assertNotNull(response);
+    }
+
+    @Test
+    public void logoutNegative() {
+        // Bad Format
+        assertThrows(RuntimeException.class, () -> facade.logout( null));
+        // Wrong authToken
+        assertThrows(RuntimeException.class, () -> facade.logout("123456789"));
     }
 }
