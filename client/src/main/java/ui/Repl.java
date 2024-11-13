@@ -5,9 +5,18 @@ import static ui.EscapeSequences.*;
 
 public class Repl {
     private final ChessClient client;
+    private boolean signedIn;
 
     public Repl(String serverUrl) {
         client = new ChessClient(serverUrl, this);
+        signedIn = false;
+    }
+
+    public void signIn() {
+        signedIn = true;
+    }
+    public void signOut() {
+        signedIn = false;
     }
 
     public void run() {

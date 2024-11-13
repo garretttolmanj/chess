@@ -1,5 +1,7 @@
 package ui;
 
+import requestResponse.ServerResponse;
+
 import java.util.Arrays;
 
 public class ChessClient {
@@ -35,26 +37,20 @@ public class ChessClient {
     }
 
     public String register(String... params) throws RuntimeException {
-        if (params.length >= 1) {
+        if (params.length == 3) {
 //            state = State.SIGNEDIN;
             String username = params[0];
             String password = params[1];
-            String email = params[3];
-            server.register(username, password, email);
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(visitorName);
-            return String.format("You signed in as %s.", username);
+            String email = params[2];
+            ServerResponse response = server.register(username, password, email);
+            repl.signIn();
+            return String.format("Successful: Signed in as " + username);
         }
-        throw new RuntimeException("Expected: <yourname>");
+        throw new RuntimeException("Expected: <yourname> <password> <email>");
     }
 
     public String help() {
-//        if (state == State.SIGNEDOUT) {
-//            return """
-//                    - signIn <yourname>
-//                    - quit
-//                    """;
-//        }
+
         return """
                 - register <username> <password> <email>
                 - login <username> <password>
