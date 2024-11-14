@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessGame;
+
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -20,10 +22,19 @@ public class Repl {
     public void signOut() {
         client = new PreLoginClient(serverUrl, this); // Switch back to pre-login client
     }
+
     public void joinGame(String authToken, Integer gameID, String teamColor) {
         client = new GameClient(serverUrl, this, authToken, gameID, teamColor);
+        if (teamColor == "BLACK") {
+            System.out.print(client.eval("drawBlack"));
+        }else {
+            System.out.print(client.eval("drawWhite"));
+        }
+    }
+
+    public void observeGame(String authToken, Integer gameID) {
+        client = new ObserveClient(serverUrl, this, authToken, gameID);
         System.out.print(client.eval("drawBlack"));
-        System.out.print(client.eval("drawWhite"));
     }
 
     public void run() {

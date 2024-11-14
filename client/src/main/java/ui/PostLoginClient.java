@@ -30,6 +30,7 @@ public class PostLoginClient implements Client{
                 case "list" -> listGames();
                 case "create" -> createGame(params);
                 case "play" -> play(params);
+                case "observe" -> observe(params);
                 case "logout" -> logout();
                 default -> help();
             };
@@ -80,6 +81,15 @@ public class PostLoginClient implements Client{
             ServerResponse response = server.joinGame(color, gameID, authToken);
             repl.joinGame(authToken, gameID, color);
             return SET_TEXT_COLOR_BLUE + "Successful: Joined game as " + color + " player";
+        }
+        throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
+    }
+    public String observe(String... params) throws RuntimeException {
+        if (params.length == 1) {
+            int ID = Integer.parseInt(params[0]);
+            int gameID = gameIDs.get(ID - 1);
+            repl.observeGame(authToken, gameID);
+            return SET_TEXT_COLOR_BLUE + "Successful: Joined game as an observer";
         }
         throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
     }

@@ -9,19 +9,17 @@ import java.util.Map;
 
 import static ui.EscapeSequences.*;
 
-public class GameClient implements Client{
+public class ObserveClient implements Client{
     private final ServerFacade server;
     private final Repl repl;
     private final String authToken;
     private final Integer gameID;
-    private String teamColor;
 
-    public GameClient(String serverUrl, Repl repl, String authToken, Integer gameID, String teamColor) {
+    public ObserveClient(String serverUrl, Repl repl, String authToken, Integer gameID) {
         server = new ServerFacade(serverUrl);
         this.repl = repl;
         this.authToken = authToken;
         this.gameID = gameID;
-        this.teamColor = teamColor;
     }
 
     public String eval(String input) {
@@ -115,9 +113,6 @@ public class GameClient implements Client{
 
         return boardDrawing + RESET_BG_COLOR;
     }
-
-
-
 
     public String leave() {
         repl.signIn(authToken);
