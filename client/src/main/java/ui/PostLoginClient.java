@@ -27,8 +27,9 @@ public class PostLoginClient implements Client{
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "list" -> listGames();
-                case "logout" -> logout();
                 case "create" -> createGame(params);
+                case "play" -> play(params);
+                case "logout" -> logout();
                 default -> help();
             };
         } catch (RuntimeException ex) {
@@ -64,7 +65,17 @@ public class PostLoginClient implements Client{
         return "Current games: \n" + "- ID Name Players \n" + games;
     }
 
-
+    public String play(String... params) throws RuntimeException {
+        if (params.length == 2) {
+            int ID = Integer.parseInt(params[0]);
+            int gameID = gameIDs.get(ID - 1);
+            String color = params[1].toUpperCase();
+            ServerResponse response = server.joinGame(color, gameID, authToken);
+            repl.joinGame(authToken, gameID, color);
+            return "Successful: Joined game as " + color + " player";
+        }
+        throw new RuntimeException("Expected: create <gameName>");
+    }
 
     public String logout() throws RuntimeException {
         server.logout(authToken);

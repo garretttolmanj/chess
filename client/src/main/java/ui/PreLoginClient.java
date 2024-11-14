@@ -21,10 +21,6 @@ public class PreLoginClient implements Client {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
-//                case "list" -> listPets();
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -55,7 +51,7 @@ public class PreLoginClient implements Client {
             repl.signIn(authToken);
             return String.format("Successful: Signed in as " + username);
         }
-        throw new RuntimeException("Expected: <yourname> <password> <email>");
+        throw new RuntimeException("Expected: login <username> <password>");
     }
 
     public String help() {

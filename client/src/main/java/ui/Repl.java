@@ -20,6 +20,10 @@ public class Repl {
     public void signOut() {
         client = new PreLoginClient(serverUrl, this); // Switch back to pre-login client
     }
+    public void joinGame(String authToken, Integer gameID, String teamColor) {
+        client = new GameClient(serverUrl, this, authToken, gameID, teamColor);
+        System.out.print(client.eval("draw"));
+    }
 
     public void run() {
         System.out.println(BLACK_KING + "Welcome to chess!! Sign in to start.");
