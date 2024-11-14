@@ -39,7 +39,7 @@ public class PreLoginClient implements Client {
             repl.signIn(authToken);
             return String.format("Successful: Signed in as " + username);
         }
-        throw new RuntimeException("Expected: <yourname> <password> <email>");
+        throw new RuntimeException("Expected: register <username> <password> <email>");
     }
 
     public String login(String... params) throws RuntimeException {

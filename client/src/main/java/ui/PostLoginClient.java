@@ -81,7 +81,7 @@ public class PostLoginClient implements Client{
             repl.joinGame(authToken, gameID, color);
             return SET_TEXT_COLOR_BLUE + "Successful: Joined game as " + color + " player";
         }
-        throw new RuntimeException("Expected: create <gameName>");
+        throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
     }
 
     public String logout() throws RuntimeException {

@@ -22,7 +22,8 @@ public class Repl {
     }
     public void joinGame(String authToken, Integer gameID, String teamColor) {
         client = new GameClient(serverUrl, this, authToken, gameID, teamColor);
-        System.out.print(client.eval("draw"));
+        System.out.print(client.eval("drawBlack"));
+        System.out.print(client.eval("drawWhite"));
     }
 
     public void run() {

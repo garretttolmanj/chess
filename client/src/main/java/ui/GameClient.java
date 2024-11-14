@@ -4,11 +4,14 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import static ui.EscapeSequences.*;
+
 import requestResponse.ServerResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
+
+import static ui.EscapeSequences.*;
 
 public class GameClient implements Client{
     private final ServerFacade server;
@@ -31,7 +34,8 @@ public class GameClient implements Client{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "draw" -> drawBoard();
+                case "drawblack" -> drawBoard();
+                case "drawwhite" -> drawBoard();
                 case "quit" -> quit();
                 default -> help();
             };
@@ -40,13 +44,38 @@ public class GameClient implements Client{
         }
     }
 
-    private String[] alphabet = new String[] {"a", "b", "c", "d", "e", "f", "g", "h"};
+
+    private static final Map<ChessPiece.PieceType, String> whitePieces = Map.of(
+            ChessPiece.PieceType.KING, WHITE_KING,
+            ChessPiece.PieceType.QUEEN, WHITE_QUEEN,
+            ChessPiece.PieceType.ROOK, WHITE_ROOK,
+            ChessPiece.PieceType.BISHOP, WHITE_BISHOP,
+            ChessPiece.PieceType.KNIGHT, WHITE_KNIGHT,
+            ChessPiece.PieceType.PAWN, WHITE_PAWN
+    );
+    private static final Map<ChessPiece.PieceType, String> blackPieces = Map.of(
+            ChessPiece.PieceType.KING, BLACK_KING,
+            ChessPiece.PieceType.QUEEN, BLACK_QUEEN,
+            ChessPiece.PieceType.ROOK, BLACK_ROOK,
+            ChessPiece.PieceType.BISHOP, BLACK_BISHOP,
+            ChessPiece.PieceType.KNIGHT, BLACK_KNIGHT,
+            ChessPiece.PieceType.PAWN, BLACK_PAWN
+    );
+    private String[] alphabet = new String[] {"a", " b ", "c", "d", " e", " f", "g", "h"};
+
+    private String getPieceSymbol(ChessPiece piece) {
+        if (piece == null) return "";
+        return piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                ? whitePieces.get(piece.getPieceType())
+                : blackPieces.get(piece.getPieceType());
+    }
+
     public String drawBoard() {
         ChessGame chessGame = new ChessGame();
         ChessBoard chessBoard = chessGame.getBoard();
-        String boardDrawing = "";
+        StringBuilder boardDrawing = new StringBuilder();
 
-        // Loop through rows and columns to create a border
+        // Loop through rows and columns to create a border and draw pieces
         for (int row = 0; row < 10; row++) {
             for (int col = 0; col < 10; col++) {
                 String square;
@@ -55,35 +84,36 @@ public class GameClient implements Client{
                 if (row == 0 || row == 9 || col == 0 || col == 9) {
                     if (col == 0 || col == 9) {
                         // Left and right border labels (row numbers)
-                        square = SET_BG_COLOR_LIGHT_BLUE + SET_TEXT_COLOR_BLACK + "  " +
+                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " +
                                 ((row > 0 && row < 9) ? String.valueOf(9 - row) : " ") + " ";
+
                     } else if (row == 0 || row == 9) {
                         // Top and bottom border labels (column letters)
-                        square = SET_BG_COLOR_LIGHT_BLUE + SET_TEXT_COLOR_BLACK + " " + alphabet[col - 1]+ "  ";
+                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + alphabet[col - 1] + " ";
                     } else {
-                        square = SET_BG_COLOR_LIGHT_BLUE + EMPTY;
+                        square = SET_BG_COLOR_BLACK + EMPTY;
                     }
                 } else {
                     // Calculate the chessboard square colors
                     ChessPosition position = new ChessPosition(row, col);
-                    ChessPiece piece = chessBoard.getPiece(position);
+                    ChessPiece chessPiece = chessBoard.getPiece(position);
+                    String pieceSymbol = getPieceSymbol(chessPiece);
 
                     if ((row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0)) {
-                        // Light square
-                        square = SET_BG_COLOR_TAN + (piece == null ? EMPTY : SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+                        square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
                     } else {
-                        // Dark square
-                        square = SET_BG_COLOR_BROWN + (piece == null ? EMPTY : SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+                        square = SET_TEXT_FAINT+ SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
                     }
                 }
 
-                boardDrawing += square;
+                boardDrawing.append(square);
             }
-            boardDrawing += RESET_BG_COLOR + "\n";  // Reset background and add a newline after each row
+            boardDrawing.append("\n");  // Reset background and add a newline after each row
         }
 
-        return boardDrawing;
+        return boardDrawing + RESET_BG_COLOR;
     }
+
 
 
 

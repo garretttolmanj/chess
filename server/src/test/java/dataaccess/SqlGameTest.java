@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,11 @@ public class SqlGameTest {
             throw new DataAccessException("Unable to delete table");
         }
         sqlGameDAO = new SqlGameDAO();
+    }
+
+    @AfterAll
+    public static void clearData() throws DataAccessException {
+        sqlGameDAO.clear();
     }
 
     private void insertGame(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) throws DataAccessException {
