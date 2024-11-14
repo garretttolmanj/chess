@@ -6,6 +6,7 @@ import requestResponse.ServerResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import static ui.EscapeSequences.*;
 
 public class PostLoginClient implements Client{
     private final ServerFacade server;
@@ -41,6 +42,9 @@ public class PostLoginClient implements Client{
         if (params.length == 1) {
             String gameName = params[0];
             ServerResponse response = server.createGame(gameName, authToken);
+
+            listGames();
+
             return String.format("Successful: Created game called " + gameName);
         }
         throw new RuntimeException("Expected: create <gameName>");
@@ -49,21 +53,24 @@ public class PostLoginClient implements Client{
     public String listGames() throws RuntimeException {
         ServerResponse response = server.listGames(authToken);
         ArrayList<GameInfo> gameList = response.getGames();
-        String games = "";
+        gameIDs.clear();  // Clear the gameIDs list before adding updated game IDs
 
+        String games = "";
         int i = 0;
         while (i < gameList.size()) {
             Integer gameID = gameList.get(i).gameID();
             String gameName = gameList.get(i).gameName();
             String whiteUsername = (gameList.get(i).whiteUsername() != null) ? gameList.get(i).whiteUsername() : "";
             String blackUsername = (gameList.get(i).blackUsername() != null) ? gameList.get(i).blackUsername() : "";
-            games += "- " + (i + 1) + " " + gameName + " WHITE[" + whiteUsername + "] BLACK[" + blackUsername +"]" + "\n";
-            gameIDs.add(gameID);
+            games += "- " + (i + 1) + " " + gameName + " WHITE[" + whiteUsername + "] BLACK[" + blackUsername + "]\n";
+
+            gameIDs.add(gameID);  // Add each game ID to the list
             i++;
         }
 
         return "Current games: \n" + "- ID Name Players \n" + games;
     }
+
 
     public String play(String... params) throws RuntimeException {
         if (params.length == 2) {
@@ -72,7 +79,7 @@ public class PostLoginClient implements Client{
             String color = params[1].toUpperCase();
             ServerResponse response = server.joinGame(color, gameID, authToken);
             repl.joinGame(authToken, gameID, color);
-            return "Successful: Joined game as " + color + " player";
+            return SET_TEXT_COLOR_BLUE + "Successful: Joined game as " + color + " player";
         }
         throw new RuntimeException("Expected: create <gameName>");
     }

@@ -26,7 +26,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println(BLACK_KING + "Welcome to chess!! Sign in to start.");
+        System.out.println(BLACK_KING + "Welcome to chess! Sign in to start.");
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
