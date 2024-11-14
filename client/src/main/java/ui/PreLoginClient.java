@@ -4,15 +4,12 @@ import requestResponse.ServerResponse;
 
 import java.util.Arrays;
 
-public class ChessClient {
-    private String visitorName = null;
+public class PreLoginClient implements Client {
     private final ServerFacade server;
-    private final String serverUrl;
     private final Repl repl;
 
-    public ChessClient(String serverUrl, Repl repl) {
+    public PreLoginClient(String serverUrl, Repl repl) {
         server = new ServerFacade(serverUrl);
-        this.serverUrl = serverUrl;
         this.repl = repl;
     }
 
@@ -23,7 +20,7 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "register" -> register(params);
-//                case "login" -> login(params);
+                case "login" -> login(params);
 //                case "list" -> listPets();
 //                case "signout" -> signOut();
 //                case "adopt" -> adoptPet(params);
@@ -38,19 +35,30 @@ public class ChessClient {
 
     public String register(String... params) throws RuntimeException {
         if (params.length == 3) {
-//            state = State.SIGNEDIN;
             String username = params[0];
             String password = params[1];
             String email = params[2];
             ServerResponse response = server.register(username, password, email);
-            repl.signIn();
+            String authToken = response.getAuthToken();
+            repl.signIn(authToken);
+            return String.format("Successful: Signed in as " + username);
+        }
+        throw new RuntimeException("Expected: <yourname> <password> <email>");
+    }
+
+    public String login(String... params) throws RuntimeException {
+        if (params.length == 2) {
+            String username = params[0];
+            String password = params[1];
+            ServerResponse response = server.login(username, password);
+            String authToken = response.getAuthToken();
+            repl.signIn(authToken);
             return String.format("Successful: Signed in as " + username);
         }
         throw new RuntimeException("Expected: <yourname> <password> <email>");
     }
 
     public String help() {
-
         return """
                 - register <username> <password> <email>
                 - login <username> <password>

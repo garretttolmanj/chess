@@ -4,19 +4,22 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
 public class Repl {
-    private final ChessClient client;
-    private boolean signedIn;
+    private Client client;
+    private final String serverUrl;
+
 
     public Repl(String serverUrl) {
-        client = new ChessClient(serverUrl, this);
-        signedIn = false;
+        this.serverUrl = serverUrl;
+        this.client = new PreLoginClient(serverUrl, this);
     }
 
-    public void signIn() {
-        signedIn = true;
+    public void signIn(String authToken) {
+        client = new PostLoginClient(serverUrl, this, authToken); // Switch to post-login client
     }
+
     public void signOut() {
-        signedIn = false;
+        client = new PreLoginClient(serverUrl, this); // Switch back to pre-login client
+        System.out.println("Signed out successfully.");
     }
 
     public void run() {
