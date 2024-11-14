@@ -1,7 +1,9 @@
 package ui;
 
+import model.GameInfo;
 import requestResponse.ServerResponse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PostLoginClient implements Client{
@@ -21,12 +23,8 @@ public class PostLoginClient implements Client{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
+                case "list" -> listGames();
                 case "logout" -> logout();
-//                case "login" -> login(params);
-//                case "list" -> listPets();
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
                 default -> help();
             };
         } catch (RuntimeException ex) {
@@ -34,18 +32,33 @@ public class PostLoginClient implements Client{
         }
     }
 
+    public String listGames() throws RuntimeException {
+        ServerResponse response = server.listGames(authToken);
+        ArrayList<GameInfo> gameList = response.getGames();
+        String games = "";
+
+        int i = 0;
+        while (i < gameList.size()) {
+            String gameName = gameList.get(i).gameName();
+            games.concat("-" + i+1 + gameName + "\n");
+            i++;
+        }
+
+        return String.format("Current games: \n" + games);
+    }
+
     public String logout() throws RuntimeException {
         server.logout(authToken);
         repl.signOut();
-        return String.format("Successful: User signed out.");
+        return "Successful: User signed out.";
     }
 
     public String help() {
         return """
-                - listGames
-                - createGame <gameName>
-                - playGame <gameName> <BLACK/WHITE>
-                - observeGame <gameName>
+                - list
+                - create <gameName>
+                - play <gameName> <BLACK/WHITE>
+                - observe <gameName>
                 - logout
                 """;
     }

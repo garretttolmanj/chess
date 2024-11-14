@@ -19,7 +19,6 @@ public class Repl {
 
     public void signOut() {
         client = new PreLoginClient(serverUrl, this); // Switch back to pre-login client
-        System.out.println("Signed out successfully.");
     }
 
     public void run() {
@@ -42,6 +41,6 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>>" + SET_TEXT_COLOR_BLUE);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_BLUE);
     }
 }
