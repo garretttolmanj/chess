@@ -34,8 +34,8 @@ public class GameClient implements Client{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "drawblack" -> drawBoard();
-                case "drawwhite" -> drawBoard();
+                case "drawblack" -> drawBoard(false);
+                case "drawwhite" -> drawBoard(true);
                 case "quit" -> quit();
                 default -> help();
             };
@@ -70,14 +70,20 @@ public class GameClient implements Client{
                 : blackPieces.get(piece.getPieceType());
     }
 
-    public String drawBoard() {
+    public String drawBoard(boolean rotated) {
         ChessGame chessGame = new ChessGame();
         ChessBoard chessBoard = chessGame.getBoard();
         StringBuilder boardDrawing = new StringBuilder();
 
         // Loop through rows and columns to create a border and draw pieces
-        for (int row = 0; row < 10; row++) {
-            for (int col = 0; col < 10; col++) {
+        int startRow = rotated ? 9 : 0;
+        int endRow = rotated ? -1: 10;
+        int startCol = rotated ? 9 : 0;
+        int endCol = rotated ? -1: 10;
+        int i = rotated ? -1 : 1;
+
+        for (int row = startRow; row != endRow; row+=i) {
+            for (int col = startCol; col != endCol; col+=i) {
                 String square;
 
                 // Check if the current position is part of the border
