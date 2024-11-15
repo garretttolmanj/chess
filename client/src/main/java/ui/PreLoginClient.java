@@ -64,6 +64,7 @@ public class PreLoginClient implements Client {
 
     public String help() {
         return """
+                - help
                 - register <username> <password> <email>
                 - login <username> <password>
                 - quit

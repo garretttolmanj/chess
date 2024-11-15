@@ -69,7 +69,7 @@ public class PostLoginClient implements Client{
             i++;
         }
 
-        return "Current games: \n" + "- ID Name Players \n" + games;
+        return "Current games: \n" + "- Game# Name Players \n" + games;
     }
 
 
@@ -82,7 +82,7 @@ public class PostLoginClient implements Client{
 
                 // Use .equals() to compare strings
                 if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                    return "Expected: play <ID> <WHITE OR BLACK> ";
+                    return "Expected: play <Game Number> <WHITE OR BLACK> ";
                 }
 
                 server.joinGame(color, gameID, authToken);
@@ -92,10 +92,10 @@ public class PostLoginClient implements Client{
                 if (e.getMessage().equals("failure 403: Forbidden")) {
                     return "Game already taken";
                 }
-                throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
+                throw new RuntimeException("Expected: play <Game Number> <WHITE OR BLACK>");
             }
         }
-        throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
+        throw new RuntimeException("Expected: play <Game Number> <WHITE OR BLACK>");
     }
 
 
@@ -107,10 +107,10 @@ public class PostLoginClient implements Client{
                 repl.observeGame(authToken, gameID);
                 return SET_TEXT_COLOR_BLUE + "Successful: Joined game as an observer";
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                throw new RuntimeException("Expected: observe <ID>");
+                throw new RuntimeException("Expected: observe <Game Number>");
             }
         }
-        throw new RuntimeException("Expected: observe <ID>");
+        throw new RuntimeException("Expected: observe <Game Number>");
     }
 
     public String logout() throws RuntimeException {
@@ -121,10 +121,11 @@ public class PostLoginClient implements Client{
 
     public String help() {
         return """
+                - help
                 - list
                 - create <gameName>
-                - play <ID> <BLACK/WHITE>
-                - observe <ID>
+                - play <Game Number> <BLACK/WHITE>
+                - observe <Game Number>
                 - logout
                 """;
     }

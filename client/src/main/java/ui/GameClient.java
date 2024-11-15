@@ -73,15 +73,18 @@ public class GameClient implements Client{
         ChessBoard chessBoard = chessGame.getBoard();
         StringBuilder boardDrawing = new StringBuilder();
 
-        // Loop through rows and columns to create a border and draw pieces
+        // Define row and column start and end based on rotation
         int startRow = rotated ? 9 : 0;
-        int endRow = rotated ? -1: 10;
-        int startCol = rotated ? 9 : 0;
-        int endCol = rotated ? -1: 10;
-        int i = rotated ? -1 : 1;
+        int endRow = rotated ? -1 : 10;
+        int rowIncrement = rotated ? -1 : 1;
 
-        for (int row = startRow; row != endRow; row+=i) {
-            for (int col = startCol; col != endCol; col+=i) {
+        int startCol = rotated ? 0 : 9;
+        int endCol = rotated ? 10 : -1;
+        int colIncrement = rotated ? 1 : -1;
+
+        // Loop through rows and columns to create a border and draw pieces
+        for (int row = startRow; row != endRow; row += rowIncrement) {
+            for (int col = startCol; col != endCol; col += colIncrement) {
                 String square;
 
                 // Check if the current position is part of the border
@@ -89,8 +92,7 @@ public class GameClient implements Client{
                     if (col == 0 || col == 9) {
                         // Left and right border labels (row numbers)
                         square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " +
-                                ((row > 0 && row < 9) ? String.valueOf(9 - row) : " ") + " ";
-
+                                ((row > 0 && row < 9) ? String.valueOf(row) : " ") + " ";
                     } else if (row == 0 || row == 9) {
                         // Top and bottom border labels (column letters)
                         square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + alphabet[col - 1] + " ";
@@ -103,10 +105,11 @@ public class GameClient implements Client{
                     ChessPiece chessPiece = chessBoard.getPiece(position);
                     String pieceSymbol = getPieceSymbol(chessPiece);
 
+                    // Determine square color and add piece symbol if present
                     if ((row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0)) {
                         square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
                     } else {
-                        square = SET_TEXT_FAINT+ SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        square = SET_TEXT_FAINT + SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
                     }
                 }
 
@@ -117,6 +120,7 @@ public class GameClient implements Client{
 
         return boardDrawing + RESET_BG_COLOR;
     }
+
 
 
 

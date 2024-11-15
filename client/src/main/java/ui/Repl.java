@@ -40,7 +40,7 @@ public class Repl {
 
     public void observeGame(String authToken, Integer gameID) {
         client = new GameClient(serverUrl, this, authToken, gameID, null);
-        System.out.print(client.eval("drawBlack"));
+        System.out.print(client.eval("drawWhite"));
     }
 
     public void run() {
