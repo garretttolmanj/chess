@@ -121,7 +121,8 @@ public class ObserveClient implements Client{
 
     public String help() {
         return """
-                - CHESS!!!!
+                - drawBlack
+                - drawWhite
                 - leave
                 """;
     }

@@ -42,7 +42,7 @@ public class PostLoginClient implements Client{
     public String createGame(String... params) throws RuntimeException {
         if (params.length == 1) {
             String gameName = params[0];
-            ServerResponse response = server.createGame(gameName, authToken);
+            server.createGame(gameName, authToken);
 
             listGames();
 
@@ -75,23 +75,42 @@ public class PostLoginClient implements Client{
 
     public String play(String... params) throws RuntimeException {
         if (params.length == 2) {
-            int ID = Integer.parseInt(params[0]);
-            int gameID = gameIDs.get(ID - 1);
-            String color = params[1].toUpperCase();
-            ServerResponse response = server.joinGame(color, gameID, authToken);
-            repl.joinGame(authToken, gameID, color);
-            return SET_TEXT_COLOR_BLUE + "Successful: Joined game as " + color + " player";
+            try {
+                int ID = Integer.parseInt(params[0]);
+                int gameID = gameIDs.get(ID - 1);
+                String color = params[1].toUpperCase();
+
+                // Use .equals() to compare strings
+                if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                    return "Expected: play <ID> <WHITE OR BLACK> ";
+                }
+
+                server.joinGame(color, gameID, authToken);
+                repl.joinGame(authToken, gameID, color);
+                return SET_TEXT_COLOR_BLUE + "Successful: Joined game as " + color + " player";
+            } catch (RuntimeException e) {
+                if (e.getMessage().equals("failure 403: Forbidden")) {
+                    return "Game already taken";
+                }
+                throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
+            }
         }
         throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
     }
+
+
     public String observe(String... params) throws RuntimeException {
         if (params.length == 1) {
-            int ID = Integer.parseInt(params[0]);
-            int gameID = gameIDs.get(ID - 1);
-            repl.observeGame(authToken, gameID);
-            return SET_TEXT_COLOR_BLUE + "Successful: Joined game as an observer";
+            try {
+                int ID = Integer.parseInt(params[0]);
+                int gameID = gameIDs.get(ID - 1);
+                repl.observeGame(authToken, gameID);
+                return SET_TEXT_COLOR_BLUE + "Successful: Joined game as an observer";
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                throw new RuntimeException("Expected: observe <ID>");
+            }
         }
-        throw new RuntimeException("Expected: play <ID> <WHITE OR BLACK>");
+        throw new RuntimeException("Expected: observe <ID>");
     }
 
     public String logout() throws RuntimeException {

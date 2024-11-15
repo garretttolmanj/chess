@@ -34,10 +34,14 @@ public class PreLoginClient implements Client {
             String username = params[0];
             String password = params[1];
             String email = params[2];
-            ServerResponse response = server.register(username, password, email);
-            String authToken = response.getAuthToken();
-            repl.signIn(authToken);
-            return String.format("Successful: Signed in as " + username);
+            try {
+                ServerResponse response = server.register(username, password, email);
+                String authToken = response.getAuthToken();
+                repl.signIn(authToken);
+                return String.format("Successful: Signed in as " + username);
+            } catch(Exception e) {
+                return "username already taken";
+            }
         }
         throw new RuntimeException("Expected: register <username> <password> <email>");
     }
@@ -46,10 +50,14 @@ public class PreLoginClient implements Client {
         if (params.length == 2) {
             String username = params[0];
             String password = params[1];
-            ServerResponse response = server.login(username, password);
-            String authToken = response.getAuthToken();
-            repl.signIn(authToken);
-            return String.format("Successful: Signed in as " + username);
+            try {
+                ServerResponse response = server.login(username, password);
+                String authToken = response.getAuthToken();
+                repl.signIn(authToken);
+                return String.format("Successful: Signed in as " + username);
+            } catch (Exception e) {
+                return "username or password not recognized";
+            }
         }
         throw new RuntimeException("Expected: login <username> <password>");
     }

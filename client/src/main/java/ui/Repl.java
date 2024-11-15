@@ -25,12 +25,18 @@ public class Repl {
 
     public void joinGame(String authToken, Integer gameID, String teamColor) {
         client = new GameClient(serverUrl, this, authToken, gameID, teamColor);
-        if (teamColor == "BLACK") {
+
+        // Use .equals() for string comparison instead of ==
+        if (teamColor.equals("BLACK")) {
             System.out.print(client.eval("drawBlack"));
-        }else {
+        } else if (teamColor.equals("WHITE")) {
             System.out.print(client.eval("drawWhite"));
+        } else {
+            // Optional: Handle the case when teamColor is neither "BLACK" nor "WHITE"
+            System.out.print("Invalid team color: " + teamColor);
         }
     }
+
 
     public void observeGame(String authToken, Integer gameID) {
         client = new ObserveClient(serverUrl, this, authToken, gameID);

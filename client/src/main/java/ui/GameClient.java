@@ -126,7 +126,8 @@ public class GameClient implements Client{
 
     public String help() {
         return """
-                - CHESS!!!!
+                - drawBlack
+                - drawWhite
                 - leave
                 """;
     }
