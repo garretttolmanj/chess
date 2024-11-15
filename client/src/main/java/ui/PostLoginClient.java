@@ -102,8 +102,8 @@ public class PostLoginClient implements Client{
     public String observe(String... params) throws RuntimeException {
         if (params.length == 1) {
             try {
-                int ID = Integer.parseInt(params[0]);
-                int gameID = gameIDs.get(ID - 1);
+                int id = Integer.parseInt(params[0]);
+                int gameID = gameIDs.get(id - 1);
                 repl.observeGame(authToken, gameID);
                 return SET_TEXT_COLOR_BLUE + "Successful: Joined game as an observer";
             } catch (NumberFormatException | IndexOutOfBoundsException e) {

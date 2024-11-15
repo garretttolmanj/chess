@@ -41,7 +41,7 @@ public class GameClient implements Client{
     }
 
 
-    private static final Map<ChessPiece.PieceType, String> WhitePieces = Map.of(
+    private static final Map<ChessPiece.PieceType, String> WHITE_PIECES = Map.of(
             ChessPiece.PieceType.KING, WHITE_KING,
             ChessPiece.PieceType.QUEEN, WHITE_QUEEN,
             ChessPiece.PieceType.ROOK, WHITE_ROOK,
@@ -49,7 +49,7 @@ public class GameClient implements Client{
             ChessPiece.PieceType.KNIGHT, WHITE_KNIGHT,
             ChessPiece.PieceType.PAWN, WHITE_PAWN
     );
-    private static final Map<ChessPiece.PieceType, String> BlackPieces = Map.of(
+    private static final Map<ChessPiece.PieceType, String> BLACK_PIECES = Map.of(
             ChessPiece.PieceType.KING, BLACK_KING,
             ChessPiece.PieceType.QUEEN, BLACK_QUEEN,
             ChessPiece.PieceType.ROOK, BLACK_ROOK,
@@ -64,8 +64,8 @@ public class GameClient implements Client{
             return "";
         }
         return piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                ? WhitePieces.get(piece.getPieceType())
-                : BlackPieces.get(piece.getPieceType());
+                ? WHITE_PIECES.get(piece.getPieceType())
+                : BLACK_PIECES.get(piece.getPieceType());
     }
 
     public String drawBoard(boolean rotated) {
