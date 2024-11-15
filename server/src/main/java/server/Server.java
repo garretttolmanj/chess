@@ -3,7 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataaccess.*;
 import server.handler.*;
-import requestResponse.*;
+import requestresponse.*;
 import service.*;
 import spark.Spark;
 

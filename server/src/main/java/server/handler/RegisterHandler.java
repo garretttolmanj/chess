@@ -1,7 +1,7 @@
 package server.handler;
 
 import dataaccess.DataAccessException;
-import requestResponse.*;
+import requestresponse.*;
 import service.UserService;
 
 public class RegisterHandler extends Handler {

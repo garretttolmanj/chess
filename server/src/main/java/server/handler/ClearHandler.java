@@ -1,7 +1,7 @@
 package server.handler;
 
 import dataaccess.DataAccessException;
-import requestResponse.*;
+import requestresponse.*;
 import service.GameService;
 import service.UserService;
 

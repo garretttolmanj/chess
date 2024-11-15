@@ -1,6 +1,6 @@
 package ui;
 
-import requestResponse.ServerResponse;
+import requestresponse.ServerResponse;
 
 import java.util.Arrays;
 

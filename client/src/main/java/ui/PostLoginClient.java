@@ -1,11 +1,11 @@
 package ui;
 
 import model.GameInfo;
-import requestResponse.ServerResponse;
+import requestresponse.ServerResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+
 import static ui.EscapeSequences.*;
 
 public class PostLoginClient implements Client{
@@ -76,8 +76,8 @@ public class PostLoginClient implements Client{
     public String play(String... params) throws RuntimeException {
         if (params.length == 2) {
             try {
-                int ID = Integer.parseInt(params[0]);
-                int gameID = gameIDs.get(ID - 1);
+                int id = Integer.parseInt(params[0]);
+                int gameID = gameIDs.get(id - 1);
                 String color = params[1].toUpperCase();
 
                 // Use .equals() to compare strings

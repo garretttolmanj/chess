@@ -5,7 +5,7 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.*;
-import requestResponse.*;
+import requestresponse.*;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -1,7 +1,7 @@
 package server.handler;
 
 import dataaccess.DataAccessException;
-import requestResponse.*;
+import requestresponse.*;
 import service.UserService;
 
 public class LogoutHandler extends Handler {

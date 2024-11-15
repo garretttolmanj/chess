@@ -6,7 +6,7 @@ import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import requestResponse.*;
+import requestresponse.*;
 import java.util.UUID;
 
 public class UserService extends Service {

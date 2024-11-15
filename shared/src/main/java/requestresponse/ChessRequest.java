@@ -1,4 +1,4 @@
-package requestResponse;
+package requestresponse;
 
 /**
  * Object that gets translated from a JSON request.

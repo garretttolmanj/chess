@@ -13,10 +13,10 @@
 <body>
 <h1><span class="chess-icon">♔</span> CS 240 Chess Server</h1>
 <p>
-    The CS 240 Chess Server Web API is described below. Some of the APIs require a requestResponse body to be sent (like
+    The CS 240 Chess Server Web API is described below. Some of the APIs require a requestresponse body to be sent (like
     <code>/user/login</code> and <code>/user/register</code>), while others require an Authorization authToken
-    (received at login). To view the required JSON format, click on a command below and look at the example requestResponse
-    body. To try out an API, modify the requestResponse as needed, and press Send.
+    (received at login). To view the required JSON format, click on a command below and look at the example requestresponse
+    body. To try out an API, modify the requestresponse as needed, and press Send.
 </p>
 
 <h2>HTTP Endpoints</h2>
@@ -61,7 +61,7 @@
             <div class="path">/game</div>
         </td>
         <td>
-            <span class="description">Lists all the games in the database</span> This API does not take a requestResponse body.
+            <span class="description">Lists all the games in the database</span> This API does not take a requestresponse body.
             The response JSON lists all the games, including the board. An authToken is required to call this endpoint.
         </td>
     </tr>
@@ -71,7 +71,7 @@
             <div class="path">/game</div>
         </td>
         <td>
-            <span class="description">Create a new Chess Game</span> The requestResponse body must contain a name for the game.
+            <span class="description">Create a new Chess Game</span> The requestresponse body must contain a name for the game.
             The response JSON contains the ID of created game, or if failed, an error message describing the reason. An
             authToken is required to call this endpoint.
         </td>
@@ -82,7 +82,7 @@
             <div class="path">/game</div>
         </td>
         <td>
-            <span class="description">Join a Chess Game</span> The requestResponse body must contain the game ID and player
+            <span class="description">Join a Chess Game</span> The requestresponse body must contain the game ID and player
             color. An authToken is required to call this endpoint.
         </td>
     </tr>
@@ -136,7 +136,7 @@
                 <div class="command">CONNECT</div>
             </td>
             <td>
-                <span class="description">Connect to game</span> Used for a user to requestResponse to connect to a game as a
+                <span class="description">Connect to game</span> Used for a user to requestresponse to connect to a game as a
                 player or observer. Requires gameID and authToken.
             </td>
         </tr>
@@ -145,7 +145,7 @@
                 <div class="command">MAKE_MOVE</div>
             </td>
             <td>
-                <span class="description">Make a move</span> Used to requestResponse to make a move in a game. Requires gameID,
+                <span class="description">Make a move</span> Used to requestresponse to make a move in a game. Requires gameID,
                 authToken, and a move. Note: You may need to edit the properties of move (startPosition, endPosition,
                 promotionPiece, row, column) to match the variable names in your code so your code can deserialize the
                 ChessMove correctly.

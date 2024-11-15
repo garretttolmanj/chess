@@ -1,6 +1,5 @@
 package client;
 
-import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.SqlAuthDAO;
 import dataaccess.SqlGameDAO;
@@ -8,8 +7,8 @@ import dataaccess.SqlUserDAO;
 import model.GameData;
 import model.GameInfo;
 import org.junit.jupiter.api.*;
-import requestResponse.ChessRequest;
-import requestResponse.ServerResponse;
+import requestresponse.ChessRequest;
+import requestresponse.ServerResponse;
 import server.Server;
 import service.GameService;
 import service.UserService;

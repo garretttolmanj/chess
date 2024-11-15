@@ -1,7 +1,7 @@
 package ui;
 
 import com.google.gson.Gson;
-import requestResponse.*;
+import requestresponse.*;
 
 import java.io.IOException;
 import java.io.InputStream;
