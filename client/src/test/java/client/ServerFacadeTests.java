@@ -14,6 +14,7 @@ import service.GameService;
 import service.UserService;
 import ui.ServerFacade;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,8 +39,9 @@ public class ServerFacadeTests {
         userService = new UserService(sqlUserDAO, sqlAuthDAO);
         gameService = new GameService(sqlGameDAO, sqlAuthDAO);
 
-        facade = new ServerFacade("http://localhost:8080");
-        var port = server.run(8080);
+
+        var port = server.run(0);
+        facade = new ServerFacade("http://localhost:" + port);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -144,7 +146,6 @@ public class ServerFacadeTests {
     }
     @Test
     public void listGamesNegative() {
-        // Wrong authToken
         assertThrows(RuntimeException.class, () -> facade.listGames("123456789"));
     }
 
@@ -224,5 +225,7 @@ public class ServerFacadeTests {
         //
         assertThrows(RuntimeException.class, () -> facade.joinGame("WHITE", gameID, auth));
     }
+
+
 
 }
