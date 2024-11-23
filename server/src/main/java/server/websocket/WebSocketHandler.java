@@ -2,11 +2,13 @@ package server.websocket;
 
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.UnauthorizedException;
+import service.WebSocketService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -20,6 +22,11 @@ import java.util.Timer;
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final WebSocketService socketService;
+
+    public WebSocketHandler(WebSocketService socketService) {
+        this.socketService = socketService;
+    }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws IOException {
@@ -43,18 +50,19 @@ public class WebSocketHandler {
         }
     }
 
-    private String getUsername(String authToken) {
-        return null;
+    private String getUsername(String authToken) throws DataAccessException {
+        return socketService.getUserName(authToken);
     }
 
     private void saveSession(Integer gameID, Session session) {}
 
     private void connect(Session session, String username, UserGameCommand command) throws IOException {
+        System.out.println(connections);
         connections.add(username, session);
         var message = String.format("%s is in the game", username);
         // Add functionality to add a message to the ServerMessage class
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast(username, notification);
+        connections.broadcast("user", notification);
     }
 
     private void makeMove(Session session, String username, UserGameCommand command) {}
@@ -65,20 +73,4 @@ public class WebSocketHandler {
 
     private void sendMessage(RemoteEndpoint remote, Error error) {}
 
-//    private void exit(String visitorName) throws IOException {
-//        connections.remove(visitorName);
-//        var message = String.format("%s left the shop", visitorName);
-//        var notification = new Notification(Notification.Type.DEPARTURE, message);
-//        connections.broadcast(visitorName, notification);
-//    }
-
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new Notification(Notification.Type.NOISE, message);
-//            connections.broadcast("", notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
 }

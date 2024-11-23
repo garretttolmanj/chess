@@ -1,4 +1,5 @@
 package server.websocket;
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -12,6 +13,8 @@ public class ConnectionManager {
     public void add(String visitorName, Session session) {
         var connection = new Connection(visitorName, session);
         connections.put(visitorName, connection);
+        System.out.println(connections);
+        System.out.println("Made it inside add connection method");
     }
 
     public void remove(String visitorName) {
@@ -20,10 +23,11 @@ public class ConnectionManager {
 
     public void broadcast(String excludeVisitorName, ServerMessage notification) throws IOException {
         var removeList = new ArrayList<Connection>();
+        System.out.println("Made it inside broadcast method");
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(notification.toString());
+                    c.send(new Gson().toJson(notification));
                 }
             } else {
                 removeList.add(c);

@@ -4,14 +4,11 @@ import com.google.gson.Gson;
 import dataaccess.*;
 import server.handler.*;
 import requestresponse.*;
+import server.websocket.WebSocketHandler;
 import service.*;
 import spark.Spark;
 
 public class Server {
-    //Set up the Services and Data Access Objects
-    private final AuthDAO authDAO = new SqlAuthDAO();
-    private final UserService userService = new UserService(new SqlUserDAO(), authDAO);
-    private final GameService gameService = new GameService(new SqlGameDAO(), authDAO);
 
     //Set up handlers
     private final ClearHandler clearHandler;
@@ -21,8 +18,17 @@ public class Server {
     private final ListGamesHandler listGamesHandler;
     private final CreateGameHandler createGameHandler;
     private final JoinGameHandler joinGameHandler;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
+        //Set up the Services and Data Access Objects
+        UserDAO userDAO = new SqlUserDAO();
+        AuthDAO authDAO = new SqlAuthDAO();
+        GameDAO gameDAO = new SqlGameDAO();
+        UserService userService = new UserService(userDAO, authDAO);
+        GameService gameService = new GameService(gameDAO, authDAO);
+        WebSocketService socketService = new WebSocketService(authDAO, gameDAO);
+        //Set up Handlers
         this.clearHandler = new ClearHandler(userService, gameService);
         this.registerHandler = new RegisterHandler(userService);
         this.loginHandler = new LoginHandler(userService);
@@ -30,12 +36,16 @@ public class Server {
         this.listGamesHandler = new ListGamesHandler(gameService);
         this.createGameHandler = new CreateGameHandler(gameService);
         this.joinGameHandler = new JoinGameHandler(gameService);
+        this.webSocketHandler = new WebSocketHandler(socketService);
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        // websocket endpoint
+        Spark.webSocket("/ws", webSocketHandler);
 
         // Chess Endpoints
         Spark.delete("/db", clearHandler::handleRequest);
