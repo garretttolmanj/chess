@@ -15,10 +15,12 @@ public class ServerMessage {
 
     private ChessGame game;
     private String message;
+    private String errorMessage;
 
     public ServerMessage() {
         this.game = null;
         this.message = null;
+        this.errorMessage = null;
     }
 
     public enum ServerMessageType {
@@ -50,6 +52,15 @@ public class ServerMessage {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String message) {
+        this.errorMessage = message;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

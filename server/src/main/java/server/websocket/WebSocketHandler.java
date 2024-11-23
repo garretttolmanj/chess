@@ -44,10 +44,13 @@ public class WebSocketHandler {
                 case RESIGN -> resign(session, username, command);
             }
         } catch (UnauthorizedException ex) {
-            sendMessage(session.getRemote(), new Error("Error: Unauthorized"));
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage("Error: Unauthorized");
+            sendMessage(session.getRemote(), error);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            sendMessage(session.getRemote(), new Error("Error: " + ex.getMessage()));
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage(ex.getMessage());
+            sendMessage(session.getRemote(), error);
         }
     }
 
@@ -66,9 +69,10 @@ public class WebSocketHandler {
         notification.setMessage(message);
         connections.broadcast(gameID, username, notification);
         // Send LOAD_GAME to user
+//        ChessGame chessGame = socketService.getGame(gameID);
         var loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         loadGame.setChessGame(new ChessGame());
-        connections.sendMessage(gameID, username, loadGame);
+        sendMessage(session.getRemote(), loadGame);
     }
 
     private void makeMove(Session session, String username, UserGameCommand command) {}
@@ -77,6 +81,8 @@ public class WebSocketHandler {
 
     private void resign(Session session, String username, UserGameCommand command) {}
 
-    private void sendMessage(RemoteEndpoint remote, Error error) {}
+    private void sendMessage(RemoteEndpoint remote, ServerMessage message) throws IOException {
+        remote.sendString(new Gson().toJson(message));
+    }
 
 }

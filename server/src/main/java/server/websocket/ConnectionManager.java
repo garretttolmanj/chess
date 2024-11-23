@@ -61,16 +61,4 @@ public class ConnectionManager {
             gameConnections.remove(gameID); // Clean up empty game groups
         }
     }
-
-    // Send a private message to a specific user in a specific game
-    public void sendMessage(Integer gameID, String username, ServerMessage notification) throws IOException {
-        var connections = gameConnections.get(gameID);
-        if (connections == null) return;
-        var connection = connections.get(username);
-        if (connection != null && connection.session.isOpen()) {
-            connection.send(new Gson().toJson(notification)); // Serialize and send message
-        } else {
-            connections.remove(username); // Remove inactive connection
-        }
-    }
 }
