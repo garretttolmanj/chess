@@ -1,6 +1,7 @@
 package server.websocket;
 
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
@@ -57,12 +58,17 @@ public class WebSocketHandler {
     private void saveSession(Integer gameID, Session session) {}
 
     private void connect(Session session, String username, UserGameCommand command) throws IOException {
-        System.out.println(connections);
-        connections.add(username, session);
+        Integer gameID = command.getGameID();
+        connections.add(gameID, username, session);
+        // Broadcast connection to other users
         var message = String.format("%s is in the game", username);
-        // Add functionality to add a message to the ServerMessage class
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        connections.broadcast("user", notification);
+        notification.setMessage(message);
+        connections.broadcast(gameID, username, notification);
+        // Send LOAD_GAME to user
+        var loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        loadGame.setChessGame(new ChessGame());
+        connections.sendMessage(gameID, username, loadGame);
     }
 
     private void makeMove(Session session, String username, UserGameCommand command) {}

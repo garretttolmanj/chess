@@ -1,4 +1,5 @@
 package server.websocket;
+
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
@@ -8,36 +9,68 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
+    // Map of gameID to another map of username to connection
+    private final ConcurrentHashMap<Integer, ConcurrentHashMap<String, Connection>> gameConnections = new ConcurrentHashMap<>();
 
-    public void add(String visitorName, Session session) {
-        var connection = new Connection(visitorName, session);
-        connections.put(visitorName, connection);
-        System.out.println(connections);
-        System.out.println("Made it inside add connection method");
+    // Add a connection for a specific game
+    public void add(Integer gameID, String username, Session session) {
+        gameConnections.putIfAbsent(gameID, new ConcurrentHashMap<>());
+        var connection = new Connection(username, session);
+        gameConnections.get(gameID).put(username, connection);
     }
 
-    public void remove(String visitorName) {
-        connections.remove(visitorName);
+    // Remove a connection for a specific game
+    public void remove(Integer gameID, String username) {
+        var connections = gameConnections.get(gameID);
+        if (connections != null) {
+            connections.remove(username);
+            if (connections.isEmpty()) {
+                gameConnections.remove(gameID); // Remove game if no players remain
+            }
+        }
     }
 
-    public void broadcast(String excludeVisitorName, ServerMessage notification) throws IOException {
-        var removeList = new ArrayList<Connection>();
-        System.out.println("Made it inside broadcast method");
-        for (var c : connections.values()) {
-            if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
-                    c.send(new Gson().toJson(notification));
+    // Broadcast a message to all players in a specific game
+    public void broadcast(Integer gameID, String excludeUsername, ServerMessage notification) throws IOException {
+        var connections = gameConnections.get(gameID);
+        if (connections == null) return; // No players in this game
+        var removeList = new ArrayList<String>(); // Keep track of closed connections
+        for (var entry : connections.entrySet()) {
+            var username = entry.getKey();
+            var connection = entry.getValue();
+            try {
+                if (connection.session.isOpen()) {
+                    if (!username.equals(excludeUsername)){
+                        connection.send(new Gson().toJson(notification));
+                    }
+                } else {
+                    removeList.add(username); // Add closed connections to remove list
                 }
-            } else {
-                removeList.add(c);
+            } catch (IOException e) {
+                System.err.println("Error sending message to " + username + ": " + e.getMessage());
+                removeList.add(username); // Add problematic connection to remove list
             }
         }
 
-        // Clean up any connections that were left open.
-        for (var c : removeList) {
-            connections.remove(c.visitorName);
+        // Remove any connections that are no longer active
+        for (var username : removeList) {
+            connections.remove(username);
+        }
+
+        if (connections.isEmpty()) {
+            gameConnections.remove(gameID); // Clean up empty game groups
+        }
+    }
+
+    // Send a private message to a specific user in a specific game
+    public void sendMessage(Integer gameID, String username, ServerMessage notification) throws IOException {
+        var connections = gameConnections.get(gameID);
+        if (connections == null) return;
+        var connection = connections.get(username);
+        if (connection != null && connection.session.isOpen()) {
+            connection.send(new Gson().toJson(notification)); // Serialize and send message
+        } else {
+            connections.remove(username); // Remove inactive connection
         }
     }
 }
-
