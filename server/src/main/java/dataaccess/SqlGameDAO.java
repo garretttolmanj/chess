@@ -69,8 +69,9 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
     @Override
     public GameData getGame(Integer gameID) throws DataAccessException {
         if (gameID == null) {
-            throw new DataAccessException("gameID can't be empty");
+            throw new DataAccessException("gameID can't be null or empty");
         }
+
         GameData singleGame = executeQuerySingle(
                 "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?",
                 rs -> {
@@ -82,6 +83,10 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
                 },
                 gameID
         );
+
+        if (singleGame == null) {
+            throw new DataAccessException("No game found with gameID: " + gameID);
+        }
 
         return singleGame;
     }
@@ -95,6 +100,7 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
         var game = new Gson().fromJson(jsonGame, ChessGame.class);
         return new GameData(id, whiteUsername, blackUsername, gameName, game);
     }
+
 
     @Override
     public int length() throws DataAccessException {

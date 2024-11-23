@@ -60,19 +60,28 @@ public class WebSocketHandler {
 
     private void saveSession(Integer gameID, Session session) {}
 
-    private void connect(Session session, String username, UserGameCommand command) throws IOException {
-        Integer gameID = command.getGameID();
-        connections.add(gameID, username, session);
-        // Broadcast connection to other users
-        var message = String.format("%s is in the game", username);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-        notification.setMessage(message);
-        connections.broadcast(gameID, username, notification);
-        // Send LOAD_GAME to user
-//        ChessGame chessGame = socketService.getGame(gameID);
-        var loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        loadGame.setChessGame(new ChessGame());
-        sendMessage(session.getRemote(), loadGame);
+    private void connect(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+
+        try {
+            // Add user to the game
+            Integer gameID = command.getGameID();
+            ChessGame chessGame = socketService.getGame(gameID);
+            ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+            loadGame.setChessGame(chessGame);
+            sendMessage(session.getRemote(), loadGame);
+            connections.add(gameID, username, session);
+
+            // Broadcast connection to other users
+            var message = String.format("%s is in the game", username);
+            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+            notification.setMessage(message);
+            connections.broadcast(gameID, username, notification);
+        } catch (DataAccessException ex) {
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage(ex.getMessage());
+            sendMessage(session.getRemote(), error);
+        }
+
     }
 
     private void makeMove(Session session, String username, UserGameCommand command) {}

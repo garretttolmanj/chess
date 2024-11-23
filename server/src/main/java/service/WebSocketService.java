@@ -1,6 +1,8 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
+import model.GameData;
 
 public class WebSocketService extends Service {
     // Initialize Data Access Objects
@@ -16,5 +18,10 @@ public class WebSocketService extends Service {
     public String getUserName(String authToken) throws DataAccessException {
         checkAuthToken(authToken);
         return authAccess.getAuth(authToken).username();
+    }
+
+    public ChessGame getGame(Integer gameID) throws DataAccessException {
+        GameData gameData = gameAccess.getGame(gameID);
+        return gameData.game();
     }
 }
