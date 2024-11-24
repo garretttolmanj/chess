@@ -1,6 +1,9 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import ui.websocket.NotificationHandler;
 import websocket.messages.ServerMessage;
 
@@ -21,28 +24,19 @@ public class Repl implements NotificationHandler {
         client = new PostLoginClient(serverUrl, this, authToken); // Switch to post-login client
     }
 
+
     public void signOut() {
         client = new PreLoginClient(serverUrl, this); // Switch back to pre-login client
     }
 
+    // Switch to game client which implements websocket functionality.
     public void joinGame(String authToken, Integer gameID, String teamColor) {
         client = new GameClient(serverUrl, this, authToken, gameID, teamColor);
-
-        // Use .equals() for string comparison instead of ==
-        if (teamColor.equals("BLACK")) {
-            System.out.print(client.eval("drawBlack"));
-        } else if (teamColor.equals("WHITE")) {
-            System.out.print(client.eval("drawWhite"));
-        } else {
-            // Optional: Handle the case when teamColor is neither "BLACK" nor "WHITE"
-            System.out.print("Invalid team color: " + teamColor);
-        }
     }
 
 
     public void observeGame(String authToken, Integer gameID) {
         client = new GameClient(serverUrl, this, authToken, gameID, null);
-        System.out.print(client.eval("drawWhite"));
     }
 
     public void run() {
@@ -63,12 +57,25 @@ public class Repl implements NotificationHandler {
         }
         System.out.println();
     }
+
     public void notify(ServerMessage notification) {
-//        System.out.println(RED + notification.message());
-        System.out.println("Message from Server");
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            ChessGame chessGame = notification.getChessGame();
+            if (chessGame == null) {
+                System.err.println("Error: ChessGame is null in LOAD_GAME notification.");
+            } else {
+                ((GameClient) client).loadGame(chessGame);
+                System.out.println(client.eval("drawBoard"));
+            }
+        } else {
+            System.out.println("Message from Server");
+        }
         printPrompt();
     }
+
+
     private void printPrompt() {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_BLUE);
     }
+
 }

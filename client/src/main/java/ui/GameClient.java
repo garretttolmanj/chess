@@ -4,6 +4,10 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import ui.websocket.NotificationHandler;
+import ui.websocket.WebSocketFacade;
+import websocket.messages.ServerMessage;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -11,17 +15,30 @@ import static ui.EscapeSequences.*;
 
 public class GameClient implements Client{
     private final ServerFacade server;
-    private final Repl repl;
+    private final String serverUrl;
+    private final NotificationHandler notificationHandler;
     private final String authToken;
     private final Integer gameID;
-    private String teamColor;
+    private final String teamColor;
+    private WebSocketFacade ws;
+    private ChessGame chessGame;
+    private final BoardRenderer boardRenderer = new BoardRenderer();
 
-    public GameClient(String serverUrl, Repl repl, String authToken, Integer gameID, String teamColor) {
+    public GameClient(String serverUrl, NotificationHandler notificationHandler, String authToken, Integer gameID, String teamColor) {
         server = new ServerFacade(serverUrl);
-        this.repl = repl;
+        this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
         this.authToken = authToken;
         this.gameID = gameID;
         this.teamColor = teamColor;
+        try {
+            this.connect();
+        } catch (RuntimeException e) {
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage(e.getMessage());
+            notificationHandler.notify(error);
+            notificationHandler.signIn(authToken);
+        }
     }
 
     public String eval(String input) {
@@ -30,8 +47,7 @@ public class GameClient implements Client{
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "drawblack" -> drawBoard(false);
-                case "drawwhite" -> drawBoard(true);
+                case "drawboard" -> drawBoard();
                 case "leave" -> leave();
                 default -> help();
             };
@@ -40,6 +56,10 @@ public class GameClient implements Client{
         }
     }
 
+    private void connect() {
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        ws.enterGame(authToken, gameID);
+    }
 
     private static final Map<ChessPiece.PieceType, String> WHITE_PIECES = Map.of(
             ChessPiece.PieceType.KING, WHITE_KING,
@@ -68,72 +88,36 @@ public class GameClient implements Client{
                 : BLACK_PIECES.get(piece.getPieceType());
     }
 
-    public String drawBoard(boolean rotated) {
-        ChessGame chessGame = new ChessGame();
-        ChessBoard chessBoard = chessGame.getBoard();
-        StringBuilder boardDrawing = new StringBuilder();
+    public void loadGame(ChessGame chessGame) {
+        this.chessGame = chessGame;
+    }
 
-        // Define row and column start and end based on rotation
-        int startRow = rotated ? 9 : 0;
-        int endRow = rotated ? -1 : 10;
-        int rowIncrement = rotated ? -1 : 1;
-
-        int startCol = rotated ? 0 : 9;
-        int endCol = rotated ? 10 : -1;
-        int colIncrement = rotated ? 1 : -1;
-
-        // Loop through rows and columns to create a border and draw pieces
-        for (int row = startRow; row != endRow; row += rowIncrement) {
-            for (int col = startCol; col != endCol; col += colIncrement) {
-                String square;
-
-                // Check if the current position is part of the border
-                if (row == 0 || row == 9 || col == 0 || col == 9) {
-                    if (col == 0 || col == 9) {
-                        // Left and right border labels (row numbers)
-                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " +
-                                ((row > 0 && row < 9) ? String.valueOf(row) : " ") + " ";
-                    } else if (row == 0 || row == 9) {
-                        // Top and bottom border labels (column letters)
-                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + alphabet[col - 1] + " ";
-                    } else {
-                        square = SET_BG_COLOR_BLACK + EMPTY;
-                    }
-                } else {
-                    // Calculate the chessboard square colors
-                    ChessPosition position = new ChessPosition(row, col);
-                    ChessPiece chessPiece = chessBoard.getPiece(position);
-                    String pieceSymbol = getPieceSymbol(chessPiece);
-
-                    // Determine square color and add piece symbol if present
-                    if ((row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0)) {
-                        square = SET_TEXT_FAINT + SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                    } else {
-                        square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                    }
-                }
-
-                boardDrawing.append(square);
-            }
-            boardDrawing.append("\n");  // Reset background and add a newline after each row
+    public String drawBoard() {
+        if (chessGame == null) {
+            return "No game loaded";
+        }
+        boolean rotateBoard;
+        if (teamColor == null) {
+            rotateBoard = true;
+            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard);
+        } else {
+            rotateBoard = !teamColor.equals("BLACK");
+            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard);
         }
 
-        return boardDrawing + RESET_BG_COLOR;
+
     }
 
 
-
-
-
     public String leave() {
-        repl.signIn(authToken);
+        notificationHandler.signIn(authToken);
         return "Left Game";
     }
 
     public String help() {
         return """
-                - drawBlack
-                - drawWhite
+                - help
+                - drawBoard
                 - leave
                 """;
     }

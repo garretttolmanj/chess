@@ -64,6 +64,16 @@ public class EscapeSequences {
     public static final String BLACK_KNIGHT = " ♞ ";
     public static final String BLACK_ROOK = " ♜ ";
     public static final String BLACK_PAWN = " ♟ ";
+    public static final String A_FULL_WIDTH = "Ａ";
+    public static final String B_FULL_WIDTH = "Ｂ";
+    public static final String C_FULL_WIDTH = "Ｃ";
+    public static final String D_FULL_WIDTH = "Ｄ";
+    public static final String E_FULL_WIDTH = "Ｅ";
+    public static final String F_FULL_WIDTH = "Ｆ";
+    public static final String G_FULL_WIDTH = "Ｇ";
+    public static final String H_FULL_WIDTH = "Ｈ";
+
+
     public static final String EMPTY = " \u2003 ";
 
     public static String moveCursorToLocation(int x, int y) { return UNICODE_ESCAPE + "[" + y + ";" + x + "H"; }
