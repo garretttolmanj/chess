@@ -57,6 +57,7 @@ public class WebSocketService extends Service {
     }
 
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
+        System.out.println("Inside Service makeMove");
         Integer gameID = command.getGameID();
         GameData gameData = getGame(gameID);
         ChessGame chessGame = gameData.game();
@@ -98,7 +99,7 @@ public class WebSocketService extends Service {
         String expectedPlayer = (teamTurn == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
 
         if (!username.equals(expectedPlayer)) {
-            sendErrorMessage(session, "Unauthorized move attempt by " + username);
+            sendErrorMessage(session, "It's not your turn!");
             return true;
         }
         return false;

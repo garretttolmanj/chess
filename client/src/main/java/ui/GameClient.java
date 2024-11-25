@@ -1,15 +1,15 @@
 package ui;
 
-import chess.ChessBoard;
 import chess.ChessGame;
-import chess.ChessPiece;
+import chess.ChessMove;
 import chess.ChessPosition;
 import ui.websocket.NotificationHandler;
 import ui.websocket.WebSocketFacade;
 import websocket.messages.ServerMessage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 import static ui.EscapeSequences.*;
 
@@ -48,6 +48,7 @@ public class GameClient implements Client{
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "drawboard" -> drawBoard();
+                case "move" -> move(params);
                 case "leave" -> leave();
                 default -> help();
             };
@@ -61,32 +62,6 @@ public class GameClient implements Client{
         ws.enterGame(authToken, gameID);
     }
 
-    private static final Map<ChessPiece.PieceType, String> WHITE_PIECES = Map.of(
-            ChessPiece.PieceType.KING, WHITE_KING,
-            ChessPiece.PieceType.QUEEN, WHITE_QUEEN,
-            ChessPiece.PieceType.ROOK, WHITE_ROOK,
-            ChessPiece.PieceType.BISHOP, WHITE_BISHOP,
-            ChessPiece.PieceType.KNIGHT, WHITE_KNIGHT,
-            ChessPiece.PieceType.PAWN, WHITE_PAWN
-    );
-    private static final Map<ChessPiece.PieceType, String> BLACK_PIECES = Map.of(
-            ChessPiece.PieceType.KING, BLACK_KING,
-            ChessPiece.PieceType.QUEEN, BLACK_QUEEN,
-            ChessPiece.PieceType.ROOK, BLACK_ROOK,
-            ChessPiece.PieceType.BISHOP, BLACK_BISHOP,
-            ChessPiece.PieceType.KNIGHT, BLACK_KNIGHT,
-            ChessPiece.PieceType.PAWN, BLACK_PAWN
-    );
-    private String[] alphabet = new String[] {"a", " b ", "c", "d", " e", " f", "g", "h"};
-
-    private String getPieceSymbol(ChessPiece piece) {
-        if (piece == null) {
-            return "";
-        }
-        return piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                ? WHITE_PIECES.get(piece.getPieceType())
-                : BLACK_PIECES.get(piece.getPieceType());
-    }
 
     public void loadGame(ChessGame chessGame) {
         this.chessGame = chessGame;
@@ -105,9 +80,39 @@ public class GameClient implements Client{
             return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard);
         }
 
-
     }
 
+    public String move(String... params) {
+        if (params.length == 2) {
+            try {
+                ChessPosition startPosition = getCoordinates(params[0]);
+                ChessPosition endPosition = getCoordinates(params[1]);
+                ChessMove move = new ChessMove(startPosition, endPosition, null);
+                ws = new WebSocketFacade(serverUrl, notificationHandler);
+                ws.makeMove(authToken, gameID, move);
+                return "";
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Expected: move <startPosition> <endPosition>");
+            }
+        }
+        throw new RuntimeException("Expected: move <startPosition> <endPosition>");
+    }
+
+    private final ArrayList<String> alphabet = new ArrayList<>(List.of("a", "b", "c", "d", "e", "f", "g", "h"));
+
+    private ChessPosition getCoordinates(String square) {
+        String letter = square.substring(0, 1);
+        String number = square.substring(1);
+        if (!alphabet.contains(letter)) {
+            throw new RuntimeException("Invalid input");
+        }
+        int row = alphabet.indexOf(letter) + 1;
+        int col = Integer.parseInt(number);
+        if (col < 1 || col > 8) {
+            throw new RuntimeException("Invalid input");
+        }
+        return new ChessPosition(col, row);
+    }
 
     public String leave() {
         notificationHandler.signIn(authToken);
@@ -118,6 +123,7 @@ public class GameClient implements Client{
         return """
                 - help
                 - drawBoard
+                - move <startPosition> <endPosition>
                 - leave
                 """;
     }

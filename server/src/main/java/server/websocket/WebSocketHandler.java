@@ -71,6 +71,7 @@ public class WebSocketHandler {
     }
 
     private void makeMove(Session session, String username, UserGameCommand command) throws DataAccessException, InvalidMoveException, IOException {
+        System.out.println("Inside Handler makeMove");
         socketService.makeMove(session, username, command, connections);
     }
 
