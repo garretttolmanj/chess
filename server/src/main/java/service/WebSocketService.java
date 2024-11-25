@@ -52,112 +52,108 @@ public class WebSocketService extends Service {
             notification.setMessage(message);
             connections.broadcast(gameID, username, notification);
         } catch (DataAccessException | IOException ex) {
-            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-            error.setErrorMessage(ex.getMessage());
-            session.getRemote().sendString(new Gson().toJson(error));
+            sendErrorMessage(session,ex.getMessage());
         }
     }
 
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
-        // get the game and make sure the user is authorized to make a move.
         Integer gameID = command.getGameID();
         GameData gameData = getGame(gameID);
         ChessGame chessGame = gameData.game();
         ChessMove chessMove = command.getChessMove();
-        ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
-        if (teamTurn == ChessGame.TeamColor.WHITE) {
-            if (!username.equals(gameData.whiteUsername())) {
-                ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-                error.setErrorMessage("Invalid Move");
-                session.getRemote().sendString(new Gson().toJson(error));
-                return;
-            }
-        } else {
-            if (!username.equals(gameData.blackUsername())) {
-                ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-                error.setErrorMessage("Invalid Move");
-                session.getRemote().sendString(new Gson().toJson(error));
-                return;
-            }
-        }
-        // Check to see if the game is already over
-        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) || chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-            error.setErrorMessage("Game is over");
-            session.getRemote().sendString(new Gson().toJson(error));
-            return;
-        } else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE) || chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
-            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-            error.setErrorMessage("Game is over");
-            session.getRemote().sendString(new Gson().toJson(error));
-            return;
-        }
+
         try {
-            // Try making the move and updating the game
+            // Validate the player and game state
+            if (isUnauthorized(chessGame, username, gameData, session)) {
+                return;
+            };
+            if (isGameOver(chessGame, session)) {
+                return;
+            };
+
+            // Make the move and update the game
             chessGame.makeMove(chessMove);
             updateGame(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), chessGame);
-            // broadcast load game to all clients in the game
+
+            // Broadcast the updated game state
             ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setChessGame(chessGame);
             connections.broadcast(gameID, "", loadGame);
-            // if any of these conditions are hit send a message to all clients
-            if (teamTurn == ChessGame.TeamColor.WHITE) {
-                if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
-                    var endGameMessage = String.format("%s is in check", ChessGame.TeamColor.BLACK);
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage(endGameMessage);
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                } else if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                    var endGameMessage = String.format("Checkmate!! %s wins!", ChessGame.TeamColor.WHITE);
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage(endGameMessage);
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                } else if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage("Stalemate!!!");
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                }
-            } else {
-                if (chessGame.isInCheck(ChessGame.TeamColor.WHITE)) {
-                    var endGameMessage = String.format("%s is in check", ChessGame.TeamColor.WHITE);
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage(endGameMessage);
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                } else if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                    var endGameMessage = String.format("Checkmate!! %s wins!", ChessGame.TeamColor.BLACK);
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage(endGameMessage);
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                } else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
-                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-                    endGame.setChessMove(chessMove);
-                    endGame.setMessage("Stalemate!!!");
-                    connections.broadcast(gameID, username, endGame);
-                    return;
-                }
+
+            // Handle conditions (check, checkmate, stalemate)
+            if (handleGameConditions(chessGame, chessMove, teamTurn(chessGame), connections, gameID, username)) {
+                return;
             }
-            // broadcast notification of move to all other clients
-            var message = String.format("%s moved their piece", username);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            notification.setChessMove(chessMove);
-            notification.setMessage(message);
-            connections.broadcast(gameID, username, notification);
-        } catch (InvalidMoveException | IOException ex) {
-            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
-            error.setErrorMessage("Invalid Move");
-            session.getRemote().sendString(new Gson().toJson(error));
+
+            // Notify other clients of the move
+            broadcastMoveNotification(chessMove, username, connections, gameID);
+
+        } catch (InvalidMoveException | DataAccessException | IOException ex) {
+            sendErrorMessage(session, "Invalid Move: " + ex.getMessage());
         }
     }
+
+    private boolean isUnauthorized(ChessGame chessGame, String username, GameData gameData, Session session) throws IOException {
+        ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
+        String expectedPlayer = (teamTurn == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
+
+        if (!username.equals(expectedPlayer)) {
+            sendErrorMessage(session, "Unauthorized move attempt by " + username);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isGameOver(ChessGame chessGame, Session session) throws IOException {
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) || chessGame.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                chessGame.isInStalemate(ChessGame.TeamColor.WHITE) || chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            sendErrorMessage(session, "Game is already over.");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID, String username) throws IOException {
+        ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+        if (chessGame.isInCheck(opponentTeam)) {
+            broadcastNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID, username);
+            return false;
+        } else if (chessGame.isInCheckmate(opponentTeam)) {
+            broadcastNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID, username);
+            return true;
+        } else if (chessGame.isInStalemate(opponentTeam)) {
+            broadcastNotification("Stalemate!!!", chessMove, connections, gameID, username);
+            return true;
+        }
+        return false;
+    }
+
+    private void broadcastMoveNotification(ChessMove chessMove, String username, ConnectionManager connections, Integer gameID) throws IOException {
+        var message = String.format("%s moved their piece", username);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setChessMove(chessMove);
+        notification.setMessage(message);
+        connections.broadcast(gameID, username, notification);
+    }
+
+    private void sendErrorMessage(Session session, String errorMessage) throws IOException {
+        ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+        error.setErrorMessage(errorMessage);
+        session.getRemote().sendString(new Gson().toJson(error));
+    }
+
+    private void broadcastNotification(String message, ChessMove chessMove, ConnectionManager connections, Integer gameID, String username) throws IOException {
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setChessMove(chessMove);
+        notification.setMessage(message);
+        connections.broadcast(gameID, username, notification);
+    }
+
+    private ChessGame.TeamColor teamTurn(ChessGame chessGame) {
+        return chessGame.getTeamTurn();
+    }
+
 
     public void updateGame(Integer gameID, String white, String black, String gameName, ChessGame chessGame) throws DataAccessException {
         GameData gameData = new GameData(gameID, white, black, gameName, chessGame);
