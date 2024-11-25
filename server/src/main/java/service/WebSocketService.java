@@ -80,6 +80,18 @@ public class WebSocketService extends Service {
                 return;
             }
         }
+        // Check to see if the game is already over
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE) || chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage("Game is over");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        } else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE) || chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            error.setErrorMessage("Game is over");
+            session.getRemote().sendString(new Gson().toJson(error));
+            return;
+        }
         try {
             // Try making the move and updating the game
             chessGame.makeMove(chessMove);
@@ -88,6 +100,52 @@ public class WebSocketService extends Service {
             ServerMessage loadGame = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
             loadGame.setChessGame(chessGame);
             connections.broadcast(gameID, "", loadGame);
+            // if any of these conditions are hit send a message to all clients
+            if (teamTurn == ChessGame.TeamColor.WHITE) {
+                if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
+                    var endGameMessage = String.format("%s is in check", ChessGame.TeamColor.BLACK);
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage(endGameMessage);
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                } else if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                    var endGameMessage = String.format("Checkmate!! %s wins!", ChessGame.TeamColor.WHITE);
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage(endGameMessage);
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                } else if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage("Stalemate!!!");
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                }
+            } else {
+                if (chessGame.isInCheck(ChessGame.TeamColor.WHITE)) {
+                    var endGameMessage = String.format("%s is in check", ChessGame.TeamColor.WHITE);
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage(endGameMessage);
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                } else if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                    var endGameMessage = String.format("Checkmate!! %s wins!", ChessGame.TeamColor.BLACK);
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage(endGameMessage);
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                } else if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
+                    var endGame = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    endGame.setChessMove(chessMove);
+                    endGame.setMessage("Stalemate!!!");
+                    connections.broadcast(gameID, username, endGame);
+                    return;
+                }
+            }
             // broadcast notification of move to all other clients
             var message = String.format("%s moved their piece", username);
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
