@@ -59,12 +59,27 @@ public class WebSocketService extends Service {
     }
 
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
-        // get the game
+        // get the game and make sure the user is authorized to make a move.
         Integer gameID = command.getGameID();
         GameData gameData = getGame(gameID);
         ChessGame chessGame = gameData.game();
         ChessMove chessMove = command.getChessMove();
-        ChessPosition startPosition = chessMove.getStartPosition();
+        ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
+        if (teamTurn == ChessGame.TeamColor.WHITE) {
+            if (!username.equals(gameData.whiteUsername())) {
+                ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+                error.setErrorMessage("Invalid Move");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
+        } else {
+            if (!username.equals(gameData.blackUsername())) {
+                ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+                error.setErrorMessage("Invalid Move");
+                session.getRemote().sendString(new Gson().toJson(error));
+                return;
+            }
+        }
         try {
             // Try making the move and updating the game
             chessGame.makeMove(chessMove);
