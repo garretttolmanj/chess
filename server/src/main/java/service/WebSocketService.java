@@ -20,8 +20,13 @@ public class WebSocketService extends Service {
         return authAccess.getAuth(authToken).username();
     }
 
-    public ChessGame getGame(Integer gameID) throws DataAccessException {
+    public GameData getGame(Integer gameID) throws DataAccessException {
         GameData gameData = gameAccess.getGame(gameID);
-        return gameData.game();
+        return gameData;
+    }
+
+    public void updateGame(Integer gameID, String white, String black, String gameName, ChessGame chessGame) throws DataAccessException {
+        GameData gameData = new GameData(gameID, white, black, gameName, chessGame);
+        gameAccess.updateGame(gameData);
     }
 }

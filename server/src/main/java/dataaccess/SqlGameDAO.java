@@ -101,6 +101,34 @@ public class SqlGameDAO extends SqlBase implements GameDAO{
         return new GameData(id, whiteUsername, blackUsername, gameName, game);
     }
 
+    @Override
+    public void updateGame(GameData game) throws DataAccessException {
+        if (game == null) {
+            throw new DataAccessException("GameData cannot be null");
+        }
+
+        // Serialize the game object to JSON
+        var jsonGame = new Gson().toJson(game.game());
+
+        // SQL update statement
+        var statement = """
+        UPDATE game
+        SET whiteUsername = ?, 
+            blackUsername = ?, 
+            gameName = ?, 
+            game = ?
+        WHERE gameID = ?
+    """;
+
+        // Execute the update query
+        executeUpdate(statement,
+                game.whiteUsername(),
+                game.blackUsername(),
+                game.gameName(),
+                jsonGame,
+                game.gameID());
+    }
+
 
     @Override
     public int length() throws DataAccessException {

@@ -121,7 +121,7 @@ public class ChessGame {
      * testMove and reverseTestMove are methods that temporarily move
      * a piece so that game state testing can be done.
      */
-    public void testMove(ChessMove move) {
+    private void testMove(ChessMove move) {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 
@@ -130,7 +130,7 @@ public class ChessGame {
         gameBoard.removePiece(startPosition);
     }
 
-    public void reverseTestMove(ChessMove move, ChessPiece enemyPiece) {
+    private void reverseTestMove(ChessMove move, ChessPiece enemyPiece) {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
 

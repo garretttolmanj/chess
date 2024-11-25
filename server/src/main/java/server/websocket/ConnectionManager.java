@@ -6,6 +6,7 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -40,7 +41,7 @@ public class ConnectionManager {
             var connection = entry.getValue();
             try {
                 if (connection.session.isOpen()) {
-                    if (!username.equals(excludeUsername)){
+                    if (!Objects.equals(username, excludeUsername)){
                         connection.send(new Gson().toJson(notification));
                     }
                 } else {

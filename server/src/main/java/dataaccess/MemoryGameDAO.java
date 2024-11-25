@@ -46,6 +46,17 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
+    public void updateGame(GameData game) throws DataAccessException {
+        int gameID = game.gameID();
+        for (GameData g : games) {
+            if (g.gameID() == gameID) {
+                games.remove(g);
+                games.add(game);
+            }
+        }
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

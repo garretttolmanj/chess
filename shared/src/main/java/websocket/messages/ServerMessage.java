@@ -1,6 +1,7 @@
 package websocket.messages;
 
 import chess.ChessGame;
+import chess.ChessMove;
 
 import java.util.Objects;
 
@@ -16,11 +17,13 @@ public class ServerMessage {
     private ChessGame game;
     private String message;
     private String errorMessage;
+    private ChessMove move;
 
     public ServerMessage() {
         this.game = null;
         this.message = null;
         this.errorMessage = null;
+        this.move = null;
     }
 
     public enum ServerMessageType {
@@ -59,6 +62,14 @@ public class ServerMessage {
 
     public void setErrorMessage(String message) {
         this.errorMessage = message;
+    }
+
+    public ChessMove getChessMove() {
+        return move;
+    }
+
+    public void setChessMove(ChessMove chessMove) {
+        this.move = chessMove;
     }
 
     @Override
