@@ -49,6 +49,7 @@ public class GameClient implements Client{
             return switch (cmd) {
                 case "drawboard" -> drawBoard();
                 case "move" -> move(params);
+                case "resign" -> resign();
                 case "leave" -> leave();
                 default -> help();
             };
@@ -60,6 +61,20 @@ public class GameClient implements Client{
     private void connect() {
         ws = new WebSocketFacade(serverUrl, notificationHandler);
         ws.enterGame(authToken, gameID);
+    }
+
+    private boolean awaitingConfirmation = false; // Tracks whether the client is awaiting confirmation for resignation.
+
+    private String resign() {
+        if (!awaitingConfirmation) {
+            awaitingConfirmation = true;
+            return "Are you sure you want to resign? Type 'resign' again to confirm.";
+        } else {
+            awaitingConfirmation = false; // Reset the flag after confirmation.
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            ws.resignGame(authToken, gameID);
+            return "You have resigned from the game.";
+        }
     }
 
 

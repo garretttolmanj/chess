@@ -76,7 +76,9 @@ public class WebSocketHandler {
 
     private void leaveGame(Session session, String username, UserGameCommand command) {}
 
-    private void resign(Session session, String username, UserGameCommand command) {}
+    private void resign(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+        socketService.resign(session, username, command, connections);
+    }
 
     private void sendMessage(RemoteEndpoint remote, ServerMessage message) throws IOException {
         remote.sendString(new Gson().toJson(message));

@@ -56,9 +56,42 @@ public class WebSocketService extends Service {
         }
     }
 
+    public void resign(Session session, String username, UserGameCommand command, ConnectionManager connections) throws IOException, DataAccessException {
+        Integer gameID = command.getGameID();
+        GameData gameData;
+
+        try {
+            gameData = getGame(gameID);
+        } catch (DataAccessException e) {
+            sendErrorMessage(session, "The Game is already over.");
+            return;
+        }
+
+        // Validate the player and game state
+        if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+            sendErrorMessage(session, "Invalid Resignation");
+            return;
+        }
+
+        gameAccess.removeGame(gameID);
+
+        // Broadcast resignation to all users
+        var message = String.format("%s has resigned, the game is over.", username);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(message);
+        connections.broadcast(gameID, "", notification);
+    }
+
+
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
         Integer gameID = command.getGameID();
-        GameData gameData = getGame(gameID);
+        GameData gameData;
+        try {
+            gameData = getGame(gameID);
+        } catch (DataAccessException e) {
+            sendErrorMessage(session, "The Game is already over.");
+            return;
+        }
         ChessGame chessGame = gameData.game();
         ChessMove chessMove = command.getChessMove();
         ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
