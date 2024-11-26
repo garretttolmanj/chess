@@ -70,8 +70,7 @@ public class WebSocketHandler {
         socketService.connect(session, username, command, connections);
     }
 
-    private void makeMove(Session session, String username, UserGameCommand command) throws DataAccessException, InvalidMoveException, IOException {
-        System.out.println("Inside Handler makeMove");
+    private void makeMove(Session session, String username, UserGameCommand command) throws InvalidMoveException, IOException, DataAccessException {
         socketService.makeMove(session, username, command, connections);
     }
 

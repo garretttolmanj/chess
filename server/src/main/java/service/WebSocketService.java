@@ -57,12 +57,11 @@ public class WebSocketService extends Service {
     }
 
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
-        System.out.println("Inside Service makeMove");
         Integer gameID = command.getGameID();
         GameData gameData = getGame(gameID);
         ChessGame chessGame = gameData.game();
         ChessMove chessMove = command.getChessMove();
-
+        ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
         try {
             // Validate the player and game state
             if (isUnauthorized(chessGame, username, gameData, session)) {
@@ -81,8 +80,8 @@ public class WebSocketService extends Service {
             loadGame.setChessGame(chessGame);
             connections.broadcast(gameID, "", loadGame);
 
-            // Handle conditions (check, checkmate, stalemate)
-            if (handleGameConditions(chessGame, chessMove, teamTurn(chessGame), connections, gameID, username)) {
+            // Handle game state conditions (check, checkmate, stalemate)
+            if (handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID)) {
                 return;
             }
 
@@ -114,17 +113,18 @@ public class WebSocketService extends Service {
         return false;
     }
 
-    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID, String username) throws IOException {
+    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException {
         ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-
+        System.out.println("Inside handle Game Conditions. Opponent: " + opponentTeam);
         if (chessGame.isInCheck(opponentTeam)) {
-            broadcastNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID, username);
+            System.out.println("Inside is in Check");
+            gameStateNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID);
             return false;
         } else if (chessGame.isInCheckmate(opponentTeam)) {
-            broadcastNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID, username);
+            gameStateNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID);
             return true;
         } else if (chessGame.isInStalemate(opponentTeam)) {
-            broadcastNotification("Stalemate!!!", chessMove, connections, gameID, username);
+            gameStateNotification("Stalemate!!!", chessMove, connections, gameID);
             return true;
         }
         return false;
@@ -144,17 +144,12 @@ public class WebSocketService extends Service {
         session.getRemote().sendString(new Gson().toJson(error));
     }
 
-    private void broadcastNotification(String message, ChessMove chessMove, ConnectionManager connections, Integer gameID, String username) throws IOException {
+    private void gameStateNotification(String message, ChessMove chessMove, ConnectionManager connections, Integer gameID) throws IOException {
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setChessMove(chessMove);
         notification.setMessage(message);
-        connections.broadcast(gameID, username, notification);
+        connections.broadcast(gameID, "", notification);
     }
-
-    private ChessGame.TeamColor teamTurn(ChessGame chessGame) {
-        return chessGame.getTeamTurn();
-    }
-
 
     public void updateGame(Integer gameID, String white, String black, String gameName, ChessGame chessGame) throws DataAccessException {
         GameData gameData = new GameData(gameID, white, black, gameName, chessGame);

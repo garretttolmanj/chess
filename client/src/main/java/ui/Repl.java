@@ -67,9 +67,11 @@ public class Repl implements NotificationHandler {
                 ((GameClient) client).loadGame(chessGame);
                 System.out.println(client.eval("drawBoard"));
             }
-        } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
+        }
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
             System.out.println(notification.getMessage());
-        } else {
+        }
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)){
             System.out.println(notification.getErrorMessage());
         }
         printPrompt();
