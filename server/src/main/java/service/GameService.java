@@ -103,8 +103,9 @@ public class GameService extends Service {
         if (isSpotOpen(game, playerColor)) {
             // Update the game based on the player color
             GameData updatedGame = addPlayer(game, playerColor, username);
-            gameAccess.removeGame(gameID);
-            gameAccess.createGame(updatedGame);
+            gameAccess.updateGame(updatedGame);
+//            gameAccess.removeGame(gameID);
+//            gameAccess.createGame(updatedGame);
             return new ServerResponse();
         } else {
             throw new AlreadyTakenException("Error: already taken");

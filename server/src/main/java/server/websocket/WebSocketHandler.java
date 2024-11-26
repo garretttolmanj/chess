@@ -74,7 +74,9 @@ public class WebSocketHandler {
         socketService.makeMove(session, username, command, connections);
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) {}
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+        socketService.leave(session, username, command, connections);
+    }
 
     private void resign(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
         socketService.resign(session, username, command, connections);

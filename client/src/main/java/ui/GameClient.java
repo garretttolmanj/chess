@@ -49,6 +49,7 @@ public class GameClient implements Client{
             return switch (cmd) {
                 case "drawboard" -> drawBoard();
                 case "move" -> move(params);
+                case "show" -> show(params);
                 case "resign" -> resign();
                 case "leave" -> leave();
                 default -> help();
@@ -77,6 +78,19 @@ public class GameClient implements Client{
         }
     }
 
+    public String leave() {
+        ws = new WebSocketFacade(serverUrl, notificationHandler);
+        ws.leaveGame(authToken, gameID);
+        notificationHandler.signIn(authToken);
+        return "Left Game";
+    }
+
+    public String show(String... params) {
+        if (params.length == 1) {
+            return "Legal Moves";
+        }
+        return "Expected: show <piecePosition>";
+    }
 
     public void loadGame(ChessGame chessGame) {
         this.chessGame = chessGame;
@@ -129,17 +143,14 @@ public class GameClient implements Client{
         return new ChessPosition(col, row);
     }
 
-    public String leave() {
-        notificationHandler.signIn(authToken);
-        return "Left Game";
-    }
-
     public String help() {
         return """
                 - help
                 - drawBoard
                 - move <startPosition> <endPosition>
+                - show <piecePosition> (highlights possible moves)
                 - leave
+                - resign
                 """;
     }
 }

@@ -82,6 +82,26 @@ public class WebSocketService extends Service {
         connections.broadcast(gameID, "", notification);
     }
 
+    public void leave(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
+        Integer gameID = command.getGameID();
+        GameData gameData = getGame(gameID);
+        if (username.equals(gameData.whiteUsername())) {
+            GameData updatedGame = new GameData(gameID, null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            gameAccess.updateGame(updatedGame);
+            connections.remove(gameID, username);
+        }
+        if (username.equals(gameData.blackUsername())) {
+            GameData updatedGame = new GameData(gameID, gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+            gameAccess.updateGame(updatedGame);
+            connections.remove(gameID, username);
+        }
+        // Broadcast resignation to all other clients that the player has left
+        var message = String.format("%s has left the game", username);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        notification.setMessage(message);
+        connections.broadcast(gameID, username, notification);
+    }
+
 
     public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
         Integer gameID = command.getGameID();
@@ -146,18 +166,18 @@ public class WebSocketService extends Service {
         return false;
     }
 
-    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException {
+    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException, DataAccessException {
         ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-        System.out.println("Inside handle Game Conditions. Opponent: " + opponentTeam);
         if (chessGame.isInCheck(opponentTeam)) {
-            System.out.println("Inside is in Check");
             gameStateNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID);
             return false;
         } else if (chessGame.isInCheckmate(opponentTeam)) {
             gameStateNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID);
+            gameAccess.removeGame(gameID);
             return true;
         } else if (chessGame.isInStalemate(opponentTeam)) {
             gameStateNotification("Stalemate!!!", chessMove, connections, gameID);
+            gameAccess.removeGame(gameID);
             return true;
         }
         return false;
