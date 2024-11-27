@@ -1,15 +1,11 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 import ui.websocket.NotificationHandler;
 import ui.websocket.WebSocketFacade;
 import websocket.messages.ServerMessage;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -87,7 +83,24 @@ public class GameClient implements Client{
 
     public String show(String... params) {
         if (params.length == 1) {
-            return "Legal Moves";
+            ChessPosition startPosition = getCoordinates(params[0]);
+            ArrayList<ChessPosition> validMoves = new ArrayList<>();
+            if (chessGame.validMoves(startPosition) == null) {
+                return "No piece at that position";
+            }
+            else {
+                for (ChessMove move : chessGame.validMoves(startPosition)) {
+                    validMoves.add(move.getEndPosition());
+                }
+                boolean rotateBoard;
+                if (teamColor == null) {
+                    rotateBoard = true;
+                    return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard, validMoves);
+                } else {
+                    rotateBoard = !teamColor.equals("BLACK");
+                    return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard, validMoves);
+                }
+            }
         }
         return "Expected: show <piecePosition>";
     }
@@ -103,10 +116,10 @@ public class GameClient implements Client{
         boolean rotateBoard;
         if (teamColor == null) {
             rotateBoard = true;
-            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard);
+            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard, new ArrayList<>());
         } else {
             rotateBoard = !teamColor.equals("BLACK");
-            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard);
+            return "\n" + boardRenderer.renderBoard(chessGame, rotateBoard, new ArrayList<>());
         }
 
     }
@@ -116,16 +129,60 @@ public class GameClient implements Client{
             try {
                 ChessPosition startPosition = getCoordinates(params[0]);
                 ChessPosition endPosition = getCoordinates(params[1]);
-                ChessMove move = new ChessMove(startPosition, endPosition, null);
+                ChessPiece.PieceType promotionPiece = null;
+
+                // Check if the move involves pawn promotion
+                if (isPawnPromotion(startPosition, endPosition)) {
+                    promotionPiece = promptPromotionPiece(); // Ask user for promotion piece
+                    if (promotionPiece == null) {
+                        return "Invalid promotion piece. Move cancelled.";
+                    }
+                }
+
+                // Create the move, including the promotion piece if applicable
+                ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
                 ws = new WebSocketFacade(serverUrl, notificationHandler);
                 ws.makeMove(authToken, gameID, move);
                 return "";
             } catch (RuntimeException e) {
+                System.out.println(e.getMessage());
                 throw new RuntimeException("Expected: move <startPosition> <endPosition>");
             }
         }
         throw new RuntimeException("Expected: move <startPosition> <endPosition>");
     }
+
+    // Helper method to check if the move involves pawn promotion
+    private boolean isPawnPromotion(ChessPosition startPosition, ChessPosition endPosition) {
+        int endRow = endPosition.getRow();
+        ChessBoard board = chessGame.getBoard();
+        // Check if the piece is a pawn and reaches the final rank
+        return board.getPiece(startPosition).getPieceType().equals(ChessPiece.PieceType.PAWN)
+                && ((teamColor.equals("WHITE") && endRow == 8) || (teamColor.equals("BLACK") && endRow == 1));
+    }
+
+
+
+    private ChessPiece.PieceType promptPromotionPiece() {
+        Scanner scanner = new Scanner(System.in); // Use Scanner to read input
+        System.out.println("Your pawn can be promoted! Choose a piece: (Q)ueen, (R)ook, (B)ishop, (K)night");
+        String input = scanner.nextLine().toUpperCase(); // Read user input and convert to uppercase
+        // Validate user input
+        switch (input) {
+            case "Q":
+                return ChessPiece.PieceType.QUEEN;
+            case "R":
+                return ChessPiece.PieceType.ROOK;
+            case "B":
+                return ChessPiece.PieceType.BISHOP;
+            case "K":
+                return ChessPiece.PieceType.KNIGHT;
+            default:
+                return null; // Invalid input
+        }
+    }
+
+
 
     private final ArrayList<String> alphabet = new ArrayList<>(List.of("a", "b", "c", "d", "e", "f", "g", "h"));
 

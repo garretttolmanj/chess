@@ -92,9 +92,6 @@ public class SqlGameTest {
 
     @Test
     public void getGamePositive() throws DataAccessException {
-        GameData test1 = sqlGameDAO.getGame(12345);
-        assertNull(test1);
-
         ChessGame game1 = new ChessGame();
         insertGame(12345, "user", null, "game1", game1);
         GameData expectedGame = new GameData(12345, "user", null, "game1", game1);
@@ -104,6 +101,7 @@ public class SqlGameTest {
 
     @Test
     public void getGameNegative() {
+        assertThrows(DataAccessException.class, () -> sqlGameDAO.getGame(12345));
         assertThrows(DataAccessException.class, () -> sqlGameDAO.getGame(null));
     }
 

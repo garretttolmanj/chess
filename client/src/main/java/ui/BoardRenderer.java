@@ -4,6 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 import static ui.EscapeSequences.*;
@@ -37,7 +39,7 @@ public class BoardRenderer {
             G_FULL_WIDTH,
             H_FULL_WIDTH};
 
-    public String renderBoard(ChessGame chessGame, boolean rotateBoard) {
+    public String renderBoard(ChessGame chessGame, boolean rotateBoard, ArrayList<ChessPosition> validMoves) {
         ChessBoard chessBoard = chessGame.getBoard();
         StringBuilder boardDrawing = new StringBuilder();
 
@@ -69,9 +71,17 @@ public class BoardRenderer {
                     String pieceSymbol = getPieceSymbol(chessPiece);
 
                     if ((row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0)) {
-                        square = SET_TEXT_FAINT + SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        if (validMoves.contains(new ChessPosition(row, col))) {
+                            square = SET_TEXT_FAINT + SET_BG_COLOR_GOLD + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        } else {
+                            square = SET_TEXT_FAINT + SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        }
                     } else {
-                        square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        if (validMoves.contains(new ChessPosition(row, col))) {
+                            square = SET_TEXT_FAINT + SET_BG_COLOR_LIGHT_YELLOW + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        } else {
+                            square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+                        }
                     }
                 }
                 boardDrawing.append(square);

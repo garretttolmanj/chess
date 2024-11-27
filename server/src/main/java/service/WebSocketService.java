@@ -134,9 +134,10 @@ public class WebSocketService extends Service {
             connections.broadcast(gameID, "", loadGame);
 
             // Handle game state conditions (check, checkmate, stalemate)
-            if (handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID)) {
-                return;
-            }
+            handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID);
+//            if (handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID)) {
+//                return;
+//            }
 
             // Notify other clients of the move
             broadcastMoveNotification(chessMove, username, connections, gameID);
@@ -166,21 +167,17 @@ public class WebSocketService extends Service {
         return false;
     }
 
-    private boolean handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException, DataAccessException {
+    private void handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException, DataAccessException {
         ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-        if (chessGame.isInCheck(opponentTeam)) {
-            gameStateNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID);
-            return false;
-        } else if (chessGame.isInCheckmate(opponentTeam)) {
+        if (chessGame.isInCheckmate(opponentTeam)) {
             gameStateNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID);
             gameAccess.removeGame(gameID);
-            return true;
         } else if (chessGame.isInStalemate(opponentTeam)) {
             gameStateNotification("Stalemate!!!", chessMove, connections, gameID);
             gameAccess.removeGame(gameID);
-            return true;
+        } else if (chessGame.isInCheck(opponentTeam)) {
+            gameStateNotification(String.format("%s is in check", opponentTeam), chessMove, connections, gameID);
         }
-        return false;
     }
 
     private void broadcastMoveNotification(ChessMove chessMove, String username, ConnectionManager connections, Integer gameID) throws IOException {
