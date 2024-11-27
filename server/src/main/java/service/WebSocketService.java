@@ -56,7 +56,11 @@ public class WebSocketService extends Service {
         }
     }
 
-    public void resign(Session session, String username, UserGameCommand command, ConnectionManager connections) throws IOException, DataAccessException {
+    public void resign(
+            Session session,
+            String username,
+            UserGameCommand command,
+            ConnectionManager connections) throws IOException, DataAccessException {
         Integer gameID = command.getGameID();
         GameData gameData;
 
@@ -82,7 +86,7 @@ public class WebSocketService extends Service {
         connections.broadcast(gameID, "", notification);
     }
 
-    public void leave(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
+    public void leave(String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
         Integer gameID = command.getGameID();
         GameData gameData = getGame(gameID);
         if (username.equals(gameData.whiteUsername())) {
@@ -103,7 +107,11 @@ public class WebSocketService extends Service {
     }
 
 
-    public void makeMove(Session session, String username, UserGameCommand command, ConnectionManager connections) throws DataAccessException, IOException {
+    public void makeMove(
+            Session session,
+            String username,
+            UserGameCommand command,
+            ConnectionManager connections) throws DataAccessException, IOException {
         Integer gameID = command.getGameID();
         GameData gameData;
         try {
@@ -135,9 +143,6 @@ public class WebSocketService extends Service {
 
             // Handle game state conditions (check, checkmate, stalemate)
             handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID);
-//            if (handleGameConditions(chessGame, chessMove, teamTurn, connections, gameID)) {
-//                return;
-//            }
 
             // Notify other clients of the move
             broadcastMoveNotification(chessMove, username, connections, gameID);
@@ -167,8 +172,14 @@ public class WebSocketService extends Service {
         return false;
     }
 
-    private void handleGameConditions(ChessGame chessGame, ChessMove chessMove, ChessGame.TeamColor teamTurn, ConnectionManager connections, Integer gameID) throws IOException, DataAccessException {
-        ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+    private void handleGameConditions(
+            ChessGame chessGame,
+            ChessMove chessMove,
+            ChessGame.TeamColor teamTurn,
+            ConnectionManager connections,
+            Integer gameID) throws IOException, DataAccessException {
+        ChessGame.TeamColor opponentTeam = (teamTurn == ChessGame.TeamColor.WHITE)
+                ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
         if (chessGame.isInCheckmate(opponentTeam)) {
             gameStateNotification(String.format("Checkmate!! %s wins!", teamTurn), chessMove, connections, gameID);
             gameAccess.removeGame(gameID);
@@ -180,7 +191,11 @@ public class WebSocketService extends Service {
         }
     }
 
-    private void broadcastMoveNotification(ChessMove chessMove, String username, ConnectionManager connections, Integer gameID) throws IOException {
+    private void broadcastMoveNotification(
+            ChessMove chessMove,
+            String username,
+            ConnectionManager connections,
+            Integer gameID) throws IOException {
         var message = String.format("%s moved their piece", username);
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setChessMove(chessMove);
@@ -194,7 +209,11 @@ public class WebSocketService extends Service {
         session.getRemote().sendString(new Gson().toJson(error));
     }
 
-    private void gameStateNotification(String message, ChessMove chessMove, ConnectionManager connections, Integer gameID) throws IOException {
+    private void gameStateNotification(
+            String message,
+            ChessMove chessMove,
+            ConnectionManager connections,
+            Integer gameID) throws IOException {
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setChessMove(chessMove);
         notification.setMessage(message);

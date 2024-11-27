@@ -53,44 +53,56 @@ public class BoardRenderer {
 
         for (int row = startRow; row != endRow; row += rowIncrement) {
             for (int col = startCol; col != endCol; col += colIncrement) {
-                String square;
-
-                // Border logic
-                if (row == 0 || row == 9 || col == 0 || col == 9) {
-                    if (col == 0 || col == 9) {
-                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " +
-                                ((row > 0 && row < 9) ? String.valueOf(row) : " ") + " ";
-                    } else if (row == 0 || row == 9) {
-                        square = SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + alphabet[col - 1] + " ";
-                    } else {
-                        square = SET_BG_COLOR_BLACK + EMPTY;
-                    }
-                } else {
-                    ChessPosition position = new ChessPosition(row, col);
-                    ChessPiece chessPiece = chessBoard.getPiece(position);
-                    String pieceSymbol = getPieceSymbol(chessPiece);
-
-                    if ((row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0)) {
-                        if (validMoves.contains(new ChessPosition(row, col))) {
-                            square = SET_TEXT_FAINT + SET_BG_COLOR_GOLD + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                        } else {
-                            square = SET_TEXT_FAINT + SET_BG_COLOR_BROWN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                        }
-                    } else {
-                        if (validMoves.contains(new ChessPosition(row, col))) {
-                            square = SET_TEXT_FAINT + SET_BG_COLOR_LIGHT_YELLOW + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                        } else {
-                            square = SET_TEXT_FAINT + SET_BG_COLOR_TAN + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
-                        }
-                    }
-                }
-                boardDrawing.append(square);
+                boardDrawing.append(determineSquare(row, col, chessBoard, validMoves));
             }
             boardDrawing.append("\n");
         }
 
         return boardDrawing + RESET_BG_COLOR;
     }
+
+    private String determineSquare(int row, int col, ChessBoard chessBoard, ArrayList<ChessPosition> validMoves) {
+        // Handle border logic
+        if (row == 0 || row == 9 || col == 0 || col == 9) {
+            return renderBorder(row, col);
+        }
+
+        // Handle board squares
+        ChessPosition position = new ChessPosition(row, col);
+        ChessPiece chessPiece = chessBoard.getPiece(position);
+        String pieceSymbol = getPieceSymbol(chessPiece);
+
+        boolean isDarkSquare = (row % 2 == 0 && col % 2 == 0) || (row % 2 != 0 && col % 2 != 0);
+        boolean isValidMove = validMoves.contains(position);
+
+        return renderSquare(isDarkSquare, isValidMove, pieceSymbol);
+    }
+
+    private String renderBorder(int row, int col) {
+        if (col == 0 || col == 9) {
+            // Row labels on the sides
+            String label = (row > 0 && row < 9) ? String.valueOf(row) : " ";
+            return SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + label + " ";
+        } else if (row == 0 || row == 9) {
+            // Column labels on the top and bottom
+            return SET_BG_COLOR_BLACK + SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + " " + alphabet[col - 1] + " ";
+        }
+        return SET_BG_COLOR_BLACK + EMPTY;
+    }
+
+    private String renderSquare(boolean isDarkSquare, boolean isValidMove, String pieceSymbol) {
+        String bgColor = getSquareColor(isDarkSquare, isValidMove);
+        return bgColor + (pieceSymbol.isEmpty() ? EMPTY : SET_TEXT_COLOR_BLACK + pieceSymbol);
+    }
+
+    private String getSquareColor(boolean isDarkSquare, boolean isValidMove) {
+        if (isValidMove) {
+            return isDarkSquare ? SET_TEXT_FAINT + SET_BG_COLOR_GOLD : SET_TEXT_FAINT + SET_BG_COLOR_LIGHT_YELLOW;
+        } else {
+            return isDarkSquare ? SET_TEXT_FAINT + SET_BG_COLOR_BROWN : SET_TEXT_FAINT + SET_BG_COLOR_TAN;
+        }
+    }
+
 
     private String getPieceSymbol(ChessPiece piece) {
         if (piece == null) {

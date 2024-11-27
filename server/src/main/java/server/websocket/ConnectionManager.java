@@ -34,7 +34,9 @@ public class ConnectionManager {
     // Broadcast a message to all players in a specific game
     public void broadcast(Integer gameID, String excludeUsername, ServerMessage notification) throws IOException {
         var connections = gameConnections.get(gameID);
-        if (connections == null) return; // No players in this game
+        if (connections == null) {
+            return; // No players in this game
+        }
         var removeList = new ArrayList<String>(); // Keep track of closed connections
         for (var entry : connections.entrySet()) {
             var username = entry.getKey();
