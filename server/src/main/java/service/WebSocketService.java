@@ -13,6 +13,9 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class WebSocketService extends Service {
     // Initialize Data Access Objects
@@ -47,10 +50,23 @@ public class WebSocketService extends Service {
             session.getRemote().sendString(new Gson().toJson(loadGame));
 
             // Broadcast connection to other users
-            var message = String.format("%s is in the game", username);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            notification.setMessage(message);
-            connections.broadcast(gameID, username, notification);
+            if (Objects.equals(gameData.whiteUsername(), username)) {
+                var message = String.format("%s joined the game as the white player", username);
+                var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                notification.setMessage(message);
+                connections.broadcast(gameID, username, notification);
+            } else if (Objects.equals(gameData.blackUsername(), username)) {
+                var message = String.format("%s joined the game as the black player", username);
+                var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                notification.setMessage(message);
+                connections.broadcast(gameID, username, notification);
+            } else {
+                var message = String.format("%s joined the game as an observer", username);
+                var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                notification.setMessage(message);
+                connections.broadcast(gameID, username, notification);
+            }
+
         } catch (DataAccessException | IOException ex) {
             sendErrorMessage(session,ex.getMessage());
         }
@@ -155,7 +171,7 @@ public class WebSocketService extends Service {
     private boolean isUnauthorized(ChessGame chessGame, String username, GameData gameData, Session session) throws IOException {
         ChessGame.TeamColor teamTurn = chessGame.getTeamTurn();
         String expectedPlayer = (teamTurn == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
-
+        System.out.println(expectedPlayer);
         if (!username.equals(expectedPlayer)) {
             sendErrorMessage(session, "It's not your turn!");
             return true;
@@ -191,12 +207,21 @@ public class WebSocketService extends Service {
         }
     }
 
+    private final ArrayList<String> alphabet = new ArrayList<>(List.of("A", "B", "C", "D", "E", "F", "G", "H"));
+
+    private String getCoordinates(ChessMove chessMove) {
+        String start = alphabet.get(chessMove.getStartPosition().getColumn() - 1) + chessMove.getStartPosition().getRow() ;
+        String end = alphabet.get(chessMove.getEndPosition().getColumn() - 1) + chessMove.getEndPosition().getRow();
+        return start + " to " + end;
+    }
+
     private void broadcastMoveNotification(
             ChessMove chessMove,
             String username,
             ConnectionManager connections,
             Integer gameID) throws IOException {
-        var message = String.format("%s moved their piece", username);
+        String move = getCoordinates(chessMove);
+        var message = String.format("%s moved %s", username, move);
         ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
         notification.setChessMove(chessMove);
         notification.setMessage(message);

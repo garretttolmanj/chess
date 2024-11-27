@@ -131,6 +131,9 @@ public class GameClient implements Client{
                 ChessPosition endPosition = getCoordinates(params[1]);
                 ChessPiece.PieceType promotionPiece = null;
 
+                if (teamColor == null) {
+                    return "Observers can't move pieces";
+                }
                 // Check if the move involves pawn promotion
                 if (isPawnPromotion(startPosition, endPosition)) {
                     promotionPiece = promptPromotionPiece(); // Ask user for promotion piece
@@ -156,6 +159,9 @@ public class GameClient implements Client{
     private boolean isPawnPromotion(ChessPosition startPosition, ChessPosition endPosition) {
         int endRow = endPosition.getRow();
         ChessBoard board = chessGame.getBoard();
+        if (board.getPiece(startPosition) == null) {
+            return false;
+        }
         // Check if the piece is a pawn and reaches the final rank
         return board.getPiece(startPosition).getPieceType().equals(ChessPiece.PieceType.PAWN)
                 && ((teamColor.equals("WHITE") && endRow == 8) || (teamColor.equals("BLACK") && endRow == 1));
